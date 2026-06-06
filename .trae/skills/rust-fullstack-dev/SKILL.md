@@ -1,4 +1,4 @@
----
+﻿---
 name: "rust-fullstack-dev"
 description: "Rust 全栈开发专用技能，涵盖 Dioxus 0.7.9 前端、Axum 后端、Cargo Workspace 组织、构建优化。当用户编写 Rust 代码、调试 Dioxus 组件、配置 Axum 路由或操作 Cargo 工作区时自动触发。"
 ---
@@ -13,10 +13,10 @@ description: "Rust 全栈开发专用技能，涵盖 Dioxus 0.7.9 前端、Axum 
 
 ```
 crates/
-├── horosa-core/    # 核心类型定义 (serde, chrono)
-├── horosa-calc/    # 计算引擎 (占星/八字/紫微/三式等)
-├── horosa-server/  # Axum 后端 (API 路由, WebSocket)
-└── horosa-web/     # Dioxus 前端 (路由, 组件, 样式)
+├── divines-core/    # 核心类型定义 (serde, chrono)
+├── divines-calc/    # 计算引擎 (占星/八字/紫微/三式等)
+├── divines-server/  # Axum 后端 (API 路由, WebSocket)
+└── divines-web/     # Dioxus 前端 (路由, 组件, 样式)
 ```
 
 ## 前端开发规范 (Dioxus 0.7.9)
@@ -34,8 +34,8 @@ crates/
 
 ### 样式
 - 全局样式在 `assets/styles.css` 中定义
-- 使用 CSS 变量 `--horosa-*` 管理主题
-- 支持亮色/暗色主题通过 `[data-horosa-appearance]` 切换
+- 使用 CSS 变量 `--Divines-*` 管理主题
+- 支持亮色/暗色主题通过 `[data-Divines-appearance]` 切换
 
 ## 后端开发规范 (Axum)
 
@@ -52,8 +52,8 @@ crates/
 ## 计算引擎规范
 
 - 所有计算函数返回 `Result<T, CalcError>`
-- 使用 `horosa_core::chart::*` 中的共享类型
-- 算法参考源仓库 (horosa-original) 中的 JavaScript 实现
+- 使用 `Divines_core::chart::*` 中的共享类型
+- 算法参考源仓库 (Divines-original) 中的 JavaScript 实现
 - 关键算法添加单元测试
 
 ## Cargo 构建
@@ -63,7 +63,7 @@ crates/
 cargo build --workspace
 
 # 仅构建前端 (Dioxus 需要 Web 目标)
-cargo build -p horosa-web
+cargo build -p divines-web
 
 # 运行测试
 cargo test --workspace

@@ -1,18 +1,18 @@
-[workspace]
+﻿[workspace]
 resolver = "2"
 members = [
-    "crates/horosa-core",
-    "crates/horosa-calc",
-    "crates/horosa-server",
-    "crates/horosa-web",
+    "crates/divines-core",
+    "crates/divines-calc",
+    "crates/divines-server",
+    "crates/divines-web",
 ]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
 license = "AGPL-3.0-only"
-authors = ["Horosa Rust Rewrite"]
-description = "星阙 Horosa - 占星与中国术数工作站，纯 Rust 全栈重写"
+authors = ["Divines"]
+description = "Divines - 纯 Rust 私域工作站"
 
 [workspace.dependencies]
 # 序列化
@@ -58,7 +58,7 @@ dioxus-logger = "0.7.9"
 dioxus-signals = "0.7.9"
 
 # 内部 crate
-horosa-core = { path = "crates/horosa-core" }
-horosa-calc = { path = "crates/horosa-calc" }
-horosa-server = { path = "crates/horosa-server" }
-horosa-web = { path = "crates/horosa-web" }
+divines-core = { path = "crates/divines-core" }
+divines-calc = { path = "crates/divines-calc" }
+divines-server = { path = "crates/divines-server" }
+divines-web = { path = "crates/divines-web" }

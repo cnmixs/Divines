@@ -1,4 +1,4 @@
----
+﻿---
 name: "agent-development"
 description: "Agent 开发最佳实践，参考 vercel-labs/agent-skills 和 ComposioHQ/awesome-claude-skills。当用户需要设计 AI Agent、构建 MCP 工具、编写 Agent 指令或优化 Agent 工作流时触发。"
 ---
@@ -25,7 +25,7 @@ description: "Agent 开发最佳实践，参考 vercel-labs/agent-skills 和 Com
 
 ### 工具命名规范
 - 使用 `namespace_verb_noun` 格式
-- 例如：`horosa_astro_chart`, `horosa_cn_qimen`
+- 例如：`Divines_astro_chart`, `Divines_cn_qimen`
 
 ### 输入契约
 - 必填字段使用 `required` 标记
@@ -45,9 +45,9 @@ description: "Agent 开发最佳实践，参考 vercel-labs/agent-skills 和 Com
 }
 ```
 
-## Horosa Skill 集成参考
+## Divines Skill 集成参考
 
-参考 [horosa-skill](https://github.com/Horace-Maxwell/horosa-skill) 的 68 个工具设计：
+参考 [divines-skill](https://github.com/Horace-Maxwell/divines-skill) 的 68 个工具设计：
 
 - **西洋占星**：chart, solarreturn, lunarreturn, profection, pd, zr, firdaria 等
 - **中文术数**：bazi_birth, ziwei_birth, qimen, liureng_gods, jinkou 等
@@ -60,7 +60,7 @@ description: "Agent 开发最佳实践，参考 vercel-labs/agent-skills 和 Com
 
 ## 本项目的 MCP 集成方案
 
-本项目 (Horosa Rust 重写) 的 MCP 工具可以通过以下方式暴露：
+本项目 (Divines 重写) 的 MCP 工具可以通过以下方式暴露：
 
 1. **Axum 端点** → 标准 HTTP API → 可被 MCP 网关调用
 2. **WebSocket** → 实时通信 → 适用于流式输出

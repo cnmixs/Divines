@@ -1,0 +1,60 @@
+[application]
+name = "divines-web"
+default_platform = "web"
+out_dir = "dist"
+asset_dir = "assets"
+
+[bundle]
+identifier = "com.divines.app"
+publisher = "Divines"
+version = "0.1.0"
+icon = ["assets/icon.png"]
+category = "Productivity"
+short_description = "Divines - 纯 Rust 私域工作站"
+long_description = "本地优先的玄学与星座桌面应用，涵盖占星、八字、紫微、七政四余、三式与数算等技法，并内置 AI 分析与挂载上下文。"
+
+# ============================================================
+# Web 平台
+# ============================================================
+[web.app]
+title = "Divines"
+
+[web.resource]
+style = ["assets/styles.css"]
+
+[web.resource.dev]
+script = []
+
+[web.watcher]
+reload_html = true
+watch_path = ["src", "assets"]
+
+# ============================================================
+# iOS 平台
+# ============================================================
+[ios]
+deployment_target = "14.0"
+
+[ios.app]
+title = "Divines"
+
+[ios.resource]
+style = ["assets/styles.css"]
+
+[ios.resource.dev]
+script = []
+
+# ============================================================
+# Android 平台
+# ============================================================
+[android]
+min_sdk_version = 24
+
+[android.app]
+title = "Divines"
+
+[android.resource]
+style = ["assets/styles.css"]
+
+[android.resource.dev]
+script = []

@@ -1,0 +1,1871 @@
+﻿/* Divines - 全局样式 */
+/* 完全对齐源仓库设计系统: astrostudyui/src/css/styles.less, */
+/*   layouts/app.less, components/homepage/PageHeader.less, global.css */
+
+/* ============================================================
+   CSS 变量体系 - 对齐源仓库的 --divines-* 命名规范
+   ============================================================ */
+
+:root {
+    /* 背景 / 表面 */
+    --divines-bg: #f3f7fc;
+    --divines-surface: rgba(255, 255, 255, 0.90);
+    --divines-surface-solid: #ffffff;
+    --divines-surface-raised: rgba(255, 255, 255, 0.97);
+    --divines-header-bg: rgba(248, 251, 255, 0.90);
+    --divines-nav-bg: rgba(238, 244, 252, 0.92);
+    --divines-panel-bg: rgba(255, 255, 255, 0.88);
+    --divines-panel-soft: rgba(242, 247, 254, 0.78);
+
+    /* 文字 */
+    --divines-text: #162033;
+    --divines-text-soft: #52627a;
+    --divines-muted: #68758a;
+
+    /* 边框 */
+    --divines-border: rgba(76, 98, 134, 0.17);
+    --divines-border-strong: rgba(51, 111, 201, 0.30);
+
+    /* 强调色 */
+    --divines-accent: #2f7df1;
+    --divines-accent-soft: rgba(47, 125, 241, 0.12);
+    --divines-accent-strong: #2167d4;
+
+    /* 金色系 */
+    --divines-gold: #9a6a25;
+    --divines-gold-soft: rgba(154, 106, 37, 0.16);
+
+    /* 青色系 */
+    --divines-cyan: #23b9d6;
+    --divines-cyan-soft: rgba(35, 185, 214, 0.12);
+
+    /* 朱红色 / 危险 */
+    --divines-cinnabar: #bf3c36;
+    --divines-danger: #cf1322;
+
+    /* 翠色 */
+    --divines-jade: #3d8f74;
+
+    /* 紫微斗数色板 */
+    --divines-ziwei-star-main: #9b6a2d;
+    --divines-ziwei-star-assist: #327f8d;
+    --divines-ziwei-star-evil: #a9473f;
+    --divines-ziwei-house-name: #9b6a2d;
+    --divines-ziwei-house-branch: #9a6a25;
+    --divines-ziwei-house-meta: #6d7b8c;
+    --divines-ziwei-house-muted: #68758a;
+    --divines-ziwei-house-age: #6f7d8d;
+    --divines-ziwei-house-line: rgba(76, 98, 134, 0.36);
+
+    /* 八字色板 */
+    --divines-bazi-wood: #237a45;
+    --divines-bazi-fire: #c72d22;
+    --divines-bazi-earth: #805526;
+    --divines-bazi-metal: #9a6a25;
+    --divines-bazi-water: #275fc7;
+    --divines-bazi-direct-bg: #fff9e6;
+    --divines-bazi-year-bg: #c8f7f5;
+
+    /* 表格 */
+    --divines-table-row-alt: rgba(47, 125, 241, 0.06);
+
+    /* 推运色板 */
+    --divines-direction-level-1: #275fc7;
+    --divines-direction-level-2: #c72d22;
+    --divines-direction-level-3: #237a45;
+    --divines-direction-level-4: #805526;
+    --divines-direction-node-highlight: rgba(154, 106, 37, 0.14);
+
+    /* 黄历 */
+    --divines-calendar-heading-bg: #fff9e6;
+
+    /* 阴影 */
+    --divines-shadow: 0 18px 46px rgba(39, 59, 91, 0.12);
+    --divines-small-shadow: 0 8px 24px rgba(39, 59, 91, 0.08);
+
+    /* 圆角 */
+    --divines-radius: 8px;
+
+    /* 布局 */
+    --divines-nav-width: 206px;
+    --divines-toolbar-height: 72px;
+    --divines-bottom-dock-height: 64px;
+    --divines-scroll-safe-bottom: calc(var(--divines-bottom-dock-height) + 18px);
+    --divines-control-height: 34px;
+
+    color-scheme: light;
+}
+
+/* 暗色主题 */
+[data-divines-appearance='dark'] {
+    --divines-bg: #050607;
+    --divines-surface: rgba(9, 11, 14, 0.88);
+    --divines-surface-solid: #090b0e;
+    --divines-surface-raised: rgba(9, 11, 14, 0.97);
+    --divines-header-bg: rgba(5, 6, 7, 0.96);
+    --divines-nav-bg: rgba(7, 8, 10, 0.96);
+    --divines-panel-bg: rgba(9, 11, 14, 0.90);
+    --divines-panel-soft: rgba(255, 255, 255, 0.025);
+    --divines-text: #edf5f2;
+    --divines-text-soft: #b9c7c9;
+    --divines-muted: #80939b;
+    --divines-border: rgba(202, 163, 93, 0.20);
+    --divines-border-strong: rgba(231, 189, 117, 0.42);
+    --divines-accent: #e7bd75;
+    --divines-accent-soft: rgba(231, 189, 117, 0.14);
+    --divines-accent-strong: #f2cf91;
+    --divines-gold: #d8ad63;
+    --divines-gold-soft: rgba(216, 173, 99, 0.18);
+    --divines-cyan: #d8ad63;
+    --divines-cyan-soft: rgba(216, 173, 99, 0.12);
+    --divines-cinnabar: #ec644e;
+    --divines-danger: #ff756c;
+    --divines-jade: #73c59a;
+    --divines-ziwei-star-main: #f1c879;
+    --divines-ziwei-star-assist: #82adb0;
+    --divines-ziwei-star-evil: #d26a5f;
+    --divines-ziwei-house-name: #f3d18b;
+    --divines-ziwei-house-branch: #c19658;
+    --divines-ziwei-house-meta: #8c9998;
+    --divines-ziwei-house-muted: #7f8d8e;
+    --divines-ziwei-house-age: #9aa6a6;
+    --divines-ziwei-house-line: rgba(216, 173, 99, 0.42);
+    --divines-table-row-alt: rgba(216, 173, 99, 0.075);
+    --divines-bazi-direct-bg: rgba(231, 189, 117, 0.10);
+    --divines-bazi-year-bg: rgba(216, 173, 99, 0.14);
+    --divines-bazi-wood: #66c486;
+    --divines-bazi-fire: #ff5f50;
+    --divines-bazi-earth: #c08a4c;
+    --divines-bazi-metal: #f0c979;
+    --divines-bazi-water: #5f8fff;
+    --divines-direction-level-1: #5f8fff;
+    --divines-direction-level-2: #ff6b5f;
+    --divines-direction-level-3: #66c486;
+    --divines-direction-level-4: #f0c979;
+    --divines-direction-node-highlight: rgba(216, 173, 99, 0.16);
+    --divines-calendar-heading-bg: rgba(231, 189, 117, 0.10);
+    --divines-shadow: 0 24px 64px rgba(0, 0, 0, 0.42);
+    --divines-small-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+    color-scheme: dark;
+}
+
+/* ============================================================
+   全局重置
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body,
+#main {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--divines-bg);
+    color: var(--divines-text);
+}
+
+body {
+    position: fixed;
+    inset: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    letter-spacing: 0;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   应用容器
+   ============================================================ */
+
+.divines-app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+}
+
+.divines-workspace-shell {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+/* 背景渐变装饰 */
+.divines-workspace-shell::before {
+    pointer-events: none;
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(circle at 22% 8%, rgba(47, 125, 241, 0.10), transparent 28%),
+        radial-gradient(circle at 88% 12%, rgba(184, 137, 63, 0.09), transparent 30%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.66), transparent 42%);
+    opacity: 1;
+    z-index: 0;
+}
+
+[data-divines-appearance='dark'] .divines-workspace-shell::before {
+    background: transparent;
+}
+
+/* ============================================================
+   顶部工具栏 - 完全对齐源仓库 PageHeader.less
+   参考: astrostudyui/src/components/homepage/PageHeader.less
+   ============================================================ */
+
+.divines-astro-header {
+    position: fixed;
+    width: 100%;
+    z-index: 100;
+    height: 72px;
+    padding: 0;
+    border-bottom: 1px solid;
+    border-bottom-color: var(--divines-border);
+    background: var(--divines-header-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    flex-shrink: 0;
+}
+
+[data-divines-appearance='dark'] .divines-astro-header {
+    background: #050607;
+    border-bottom-color: rgba(215, 173, 105, 0.18);
+}
+
+/* userbox 三段式网格 - 对齐源仓库 .userbox 和 .astroUserbox */
+.divines-userbox {
+    display: grid;
+    grid-template-columns: 204px minmax(0, 1fr) minmax(380px, 500px);
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    height: 100%;
+    padding: 0 18px;
+    overflow: hidden;
+}
+
+.divines-astro-userbox {
+    grid-template-columns: minmax(292px, 390px) minmax(430px, 1fr) minmax(126px, 170px) !important;
+    gap: 12px !important;
+    padding: 0 22px !important;
+    background: #050607;
+    color: #f2e7d2;
+}
+
+[data-divines-appearance='light'] .divines-astro-userbox {
+    background: var(--divines-header-bg);
+    color: var(--divines-text);
+}
+
+/* 品牌区 - 对齐源仓库 .astroBrand */
+.divines-astro-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 22px;
+    min-width: 292px;
+}
+
+/* 品牌按钮 - 对齐源仓库 .brandButton .astroBrandButton */
+.divines-brand-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 50px;
+    padding: 0 12px 0 6px;
+    border: 0;
+    background: transparent;
+    color: var(--divines-text);
+    cursor: pointer;
+}
+
+.divines-astro-brand-button {
+    height: 56px;
+    gap: 12px;
+    padding: 0;
+}
+
+.divines-brand-button:hover .divines-brand-mark {
+    border-color: var(--divines-gold);
+    color: var(--divines-gold);
+    box-shadow: 0 0 0 4px var(--divines-gold-soft);
+}
+
+/* 品牌标志 - 对齐源仓库 .brandMark .astroBrandMark */
+.divines-brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--divines-border-strong);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.28), transparent 28%),
+        conic-gradient(from 22deg, var(--divines-gold), var(--divines-cyan, var(--divines-accent)), var(--divines-gold)),
+        var(--divines-panel-soft);
+    color: #fff;
+    font-size: 22px;
+    box-shadow: inset 0 0 0 5px var(--divines-panel-soft);
+    transition: all 0.18s ease;
+}
+
+.divines-astro-brand-mark {
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #e0b86f;
+    font-size: 34px;
+    box-shadow: none;
+}
+
+[data-divines-appearance='light'] .divines-astro-brand-mark {
+    color: var(--divines-gold) !important;
+}
+
+[data-divines-appearance='light'] .divines-brand-mark {
+    border-color: var(--divines-border);
+}
+
+/* 品牌文字 - 对齐源仓库 .brandText .astroBrandText */
+.divines-brand-text {
+    color: var(--divines-text);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0;
+}
+
+[data-divines-appearance='dark'] .divines-brand-text {
+    color: var(--divines-gold);
+    text-shadow: 0 0 18px rgba(216, 173, 99, 0.16);
+}
+
+.divines-astro-brand-text {
+    color: #e8c07a !important;
+    font-size: 26px;
+    font-weight: 700;
+    text-shadow: none !important;
+}
+
+[data-divines-appearance='light'] .divines-astro-brand-text {
+    color: var(--divines-gold) !important;
+}
+
+/* 新命盘按钮组 - 对齐源仓库 .astroNewChartGroup */
+.divines-astro-new-chart-group {
+    display: inline-flex;
+    align-items: center;
+    height: 38px;
+    border: 1px solid rgba(218, 177, 111, 0.28);
+    border-radius: 7px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.025);
+    flex: 0 0 auto;
+}
+
+[data-divines-appearance='light'] .divines-astro-new-chart-group {
+    border-color: var(--divines-border);
+    background: var(--divines-surface-raised);
+}
+
+/* 主命令按钮 - 对齐源仓库 .astroPrimaryCommand */
+.divines-astro-primary-command {
+    min-width: 110px;
+    height: 38px !important;
+    border: 0 !important;
+    border-right: 1px solid rgba(218, 177, 111, 0.18) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #f0c983 !important;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 0 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+}
+
+.divines-astro-primary-command:hover {
+    color: #f8d8a0 !important;
+    background: rgba(232, 192, 122, 0.08) !important;
+}
+
+[data-divines-appearance='light'] .divines-astro-primary-command {
+    border-right-color: var(--divines-border) !important;
+    color: var(--divines-gold) !important;
+}
+
+/* 分割按钮 - 对齐源仓库 .astroSplitButton */
+.divines-astro-split-button {
+    width: 36px;
+    height: 38px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #d0c4b4 !important;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.divines-astro-split-button:hover {
+    color: #f0c983 !important;
+    background: rgba(232, 192, 122, 0.08) !important;
+}
+
+[data-divines-appearance='light'] .divines-astro-split-button {
+    color: var(--divines-text-soft) !important;
+}
+
+/* 当前模块导航按钮 - 对齐源仓库 .astroCurrentModule */
+.divines-astro-current-module-wrap {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 3;
+    transform: translate(-50%, -50%);
+}
+
+.divines-astro-current-module {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 46px;
+    min-width: 138px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #e8c07a;
+    font-size: 19px;
+    font-weight: 760;
+    letter-spacing: 0;
+    box-shadow: none;
+    cursor: pointer;
+    transition: color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.divines-astro-current-module:hover,
+.divines-astro-current-module:focus {
+    background: rgba(232, 192, 122, 0.08);
+    color: #f0c983;
+    outline: none;
+}
+
+.divines-astro-current-module-icon {
+    color: #d8b16b;
+    font-size: 21px;
+}
+
+.divines-astro-current-module-chevron {
+    font-size: 14px;
+    opacity: 0.72;
+}
+
+[data-divines-appearance='light'] .divines-astro-current-module {
+    color: var(--divines-gold) !important;
+}
+
+[data-divines-appearance='light'] .divines-astro-current-module:hover,
+[data-divines-appearance='light'] .divines-astro-current-module:focus {
+    background: var(--divines-gold-soft);
+    color: var(--divines-gold) !important;
+}
+
+[data-divines-appearance='light'] .divines-astro-current-module-icon {
+    color: var(--divines-gold);
+}
+
+/* 命令中心 - 对齐源仓库 .astroCommandCenter */
+.divines-astro-command-center {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 22px;
+    min-width: 0;
+    padding-right: 18px;
+}
+
+/* 头部命令按钮 - 对齐源仓库 .astroHeaderCommand */
+.divines-astro-header-command {
+    height: 38px !important;
+    padding: 0 4px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: rgba(239, 232, 219, 0.78) !important;
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: none !important;
+    transition: color 0.15s;
+}
+
+.divines-astro-header-command:hover,
+.divines-astro-header-command:focus {
+    color: #f0c983 !important;
+}
+
+[data-divines-appearance='light'] .divines-astro-header-command {
+    color: var(--divines-text-soft) !important;
+}
+
+[data-divines-appearance='light'] .divines-astro-header-command:hover,
+[data-divines-appearance='light'] .divines-astro-header-command:focus {
+    background: var(--divines-gold-soft);
+    color: var(--divines-gold) !important;
+}
+
+/* 实用工具栏 - 对齐源仓库 .astroUtilityBar */
+.divines-astro-utility-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 18px;
+    min-width: 0;
+}
+
+/* 圆形按钮 - 对齐源仓库 .astroRoundButton */
+.divines-astro-round-button {
+    width: 40px;
+    min-width: 40px;
+    height: 40px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #f0c983 !important;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.15s;
+}
+
+.divines-astro-round-button:hover {
+    background: rgba(232, 192, 122, 0.1) !important;
+}
+
+[data-divines-appearance='light'] .divines-astro-round-button {
+    color: var(--divines-gold) !important;
+}
+
+/* 分隔线 - 对齐源仓库 .astroHeaderDivider */
+.divines-astro-header-divider {
+    width: 1px;
+    height: 30px;
+    background: rgba(218, 177, 111, 0.22);
+}
+
+[data-divines-appearance='light'] .divines-astro-header-divider {
+    background: var(--divines-border);
+}
+
+/* 用户账号区 - 对齐源仓库 .account .astroAccount */
+.divines-account {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    height: 34px;
+    padding: 0 8px;
+    border: 1px solid var(--divines-border);
+    border-radius: 999px;
+    background: var(--divines-panel-soft);
+    color: var(--divines-text);
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.divines-account:hover {
+    border-color: var(--divines-accent);
+    background: var(--divines-accent-soft);
+}
+
+.divines-astro-account {
+    width: 42px;
+    height: 42px;
+    justify-content: center;
+    padding: 0;
+    border-color: rgba(218, 177, 111, 0.24);
+    background: rgba(255, 255, 255, 0.035);
+}
+
+[data-divines-appearance='light'] .divines-astro-account {
+    border-color: var(--divines-border);
+    background: var(--divines-surface-raised);
+}
+
+.divines-avatar {
+    color: var(--divines-accent-strong);
+    background: var(--divines-panel-bg);
+    vertical-align: middle;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--divines-accent-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.divines-name {
+    max-width: 88px;
+    overflow: hidden;
+    color: var(--divines-text);
+    font-size: 13px;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.divines-astro-account .divines-name {
+    display: none;
+}
+
+/* ============================================================
+   导航弹窗 - 对齐源仓库 HomePageSetup
+   ============================================================ */
+
+.divines-nav-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.15s ease;
+}
+
+.divines-nav-popup {
+    width: 800px;
+    max-width: 90vw;
+    max-height: 80vh;
+    background: var(--divines-surface-raised);
+    border: 1px solid var(--divines-border);
+    border-radius: 12px;
+    box-shadow: var(--divines-shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.18s ease;
+}
+
+.divines-nav-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--divines-border);
+}
+
+.divines-nav-search-input {
+    flex: 1;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--divines-border);
+    border-radius: 8px;
+    background: var(--divines-surface-solid);
+    color: var(--divines-text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.divines-nav-search-input:focus {
+    border-color: var(--divines-accent);
+    box-shadow: 0 0 0 2px var(--divines-accent-soft);
+}
+
+.divines-nav-popup-close {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--divines-muted);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.divines-nav-popup-close:hover {
+    background: var(--divines-accent-soft);
+    color: var(--divines-accent);
+}
+
+.divines-nav-popup-body {
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.divines-nav-popup-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.divines-nav-popup-group-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--divines-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.divines-nav-popup-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 6px;
+}
+
+.divines-nav-popup-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1px solid var(--divines-border);
+    border-radius: 8px;
+    background: var(--divines-surface-solid);
+    color: var(--divines-text-soft);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    width: 100%;
+}
+
+.divines-nav-popup-item:hover {
+    background: var(--divines-accent-soft);
+    color: var(--divines-accent);
+    border-color: var(--divines-accent-strong);
+}
+
+.divines-nav-popup-item.active {
+    background: var(--divines-accent-soft);
+    color: var(--divines-accent);
+    border-color: var(--divines-accent-strong);
+    font-weight: 600;
+}
+
+.divines-nav-popup-item-icon {
+    font-size: 16px;
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.divines-nav-popup-item-label {
+    flex: 1;
+}
+
+/* ============================================================
+   模态弹窗 - 对齐源仓库 XQModal
+   ============================================================ */
+
+.divines-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.15s ease;
+}
+
+.divines-modal {
+    width: 520px;
+    max-width: 90vw;
+    max-height: 80vh;
+    background: var(--divines-surface-raised);
+    border: 1px solid var(--divines-border);
+    border-radius: 12px;
+    box-shadow: var(--divines-shadow);
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.18s ease;
+}
+
+.divines-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--divines-border);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--divines-text);
+}
+
+.divines-modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--divines-muted);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.divines-modal-close:hover {
+    background: var(--divines-accent-soft);
+    color: var(--divines-accent);
+}
+
+.divines-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    color: var(--divines-text-soft);
+    line-height: 1.8;
+}
+
+.divines-modal-body p {
+    margin: 0 0 8px;
+}
+
+.divines-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--divines-border);
+}
+
+/* 设置分组 */
+.divines-settings-group {
+    display: grid;
+    gap: 9px;
+    margin-bottom: 20px;
+}
+
+.divines-settings-group-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--divines-text);
+}
+
+.divines-settings-hint {
+    font-size: 12px;
+    color: var(--divines-muted);
+    line-height: 1.6;
+    padding: 8px 12px;
+    background: var(--divines-panel-soft);
+    border-left: 3px solid var(--divines-accent);
+    border-radius: 6px;
+}
+
+/* 分段选择器 */
+.divines-segmented {
+    display: inline-flex;
+    border: 1px solid var(--divines-border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--divines-surface-solid);
+}
+
+.divines-segmented-item {
+    padding: 6px 16px;
+    border: none;
+    border-right: 1px solid var(--divines-border);
+    background: transparent;
+    color: var(--divines-text-soft);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.divines-segmented-item:last-child {
+    border-right: none;
+}
+
+.divines-segmented-item:hover {
+    background: var(--divines-accent-soft);
+    color: var(--divines-accent);
+}
+
+.divines-segmented-item.active {
+    background: var(--divines-accent-soft);
+    color: var(--divines-accent);
+    font-weight: 600;
+}
+
+/* 按钮 */
+.divines-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 16px;
+    border: 1px solid var(--divines-border);
+    border-radius: 6px;
+    background: var(--divines-surface-solid);
+    color: var(--divines-text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.divines-btn:hover {
+    border-color: var(--divines-accent);
+    background: var(--divines-accent-soft);
+}
+
+.divines-btn-primary {
+    background: var(--divines-accent);
+    color: #fff;
+    border-color: var(--divines-accent);
+    font-weight: 500;
+}
+
+.divines-btn-primary:hover {
+    opacity: 0.92;
+}
+
+/* 关于弹窗 */
+.divines-about-body {
+    display: grid;
+    gap: 14px;
+    padding: 4px 2px 2px;
+}
+
+.divines-about-head-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.divines-about-logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: #fff;
+    background: linear-gradient(150deg, var(--divines-accent), var(--divines-accent-strong, #2666cf));
+    box-shadow: 0 8px 20px rgba(47, 125, 241, 0.3);
+}
+
+.divines-about-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--divines-text);
+}
+
+.divines-about-version {
+    margin-top: 3px;
+    font-size: 12.5px;
+    color: var(--divines-text-soft);
+}
+
+.divines-about-desc {
+    font-size: 12.5px;
+    line-height: 1.66;
+    color: var(--divines-text-soft);
+}
+
+/* ============================================================
+   主内容区
+   ============================================================ */
+
+.divines-app-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    margin-top: 72px;
+    height: calc(100vh - 72px);
+}
+
+/* 左侧垂直标签导航 - 对齐源仓库 mainRootTabs */
+.divines-nav-tabs {
+    display: flex;
+    flex-direction: column;
+    width: var(--divines-nav-width);
+    background: var(--divines-nav-bg);
+    border-right: 1px solid var(--divines-border);
+    flex-shrink: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px 0;
+}
+
+.divines-nav-tab-group {
+    display: flex;
+    flex-direction: column;
+    padding: 2px 8px;
+}
+
+.divines-nav-tab-group-header {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--divines-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 8px 4px;
+}
+
+.divines-nav-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: var(--divines-text-soft);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    text-align: left;
+    width: 100%;
+    text-decoration: none;
+}
+
+.divines-nav-tab:hover {
+    background: var(--divines-accent-soft);
+    color: var(--divines-text);
+}
+
+.divines-nav-tab.active {
+    background: var(--divines-accent-soft);
+    color: var(--divines-accent);
+    font-weight: 600;
+}
+
+.divines-nav-tab-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.divines-nav-tab-label {
+    flex: 1;
+}
+
+/* 主内容区 */
+.divines-main-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    background: transparent;
+}
+
+.divines-content-pane {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+/* ============================================================
+   页面通用样式
+   ============================================================ */
+
+.page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.page h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--divines-text);
+}
+
+.page h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--divines-text);
+}
+
+.page h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--divines-text-soft);
+}
+
+.page-desc {
+    color: var(--divines-muted);
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.page p {
+    color: var(--divines-text-soft);
+    margin-bottom: 8px;
+}
+
+/* ============================================================
+   首页 Hero 区域
+   ============================================================ */
+
+.hero {
+    text-align: center;
+    padding: 64px 0 48px;
+}
+
+.hero h1 {
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--divines-accent);
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+}
+
+.hero .subtitle {
+    font-size: 18px;
+    color: var(--divines-text);
+    margin-bottom: 8px;
+}
+
+.hero .subtitle-en {
+    font-size: 14px;
+    color: var(--divines-muted);
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 32px 0;
+}
+
+.feature-card {
+    background: var(--divines-panel-bg);
+    border: 1px solid var(--divines-border);
+    border-radius: var(--divines-radius);
+    padding: 20px;
+    box-shadow: var(--divines-small-shadow);
+}
+
+.feature-card h3 {
+    color: var(--divines-accent);
+    margin-bottom: 12px;
+    font-size: 15px;
+}
+
+.feature-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-card li {
+    padding: 3px 0;
+    color: var(--divines-text-soft);
+    font-size: 13px;
+}
+
+.feature-card li::before {
+    content: "• ";
+    color: var(--divines-accent);
+}
+
+.quick-actions {
+    margin: 32px 0;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--divines-control-height);
+    padding: 0 20px;
+    background: var(--divines-accent);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    opacity: 0.92;
+}
+
+/* ============================================================
+   表单卡片
+   ============================================================ */
+
+.form-card {
+    background: var(--divines-panel-bg);
+    border: 1px solid var(--divines-border);
+    border-radius: var(--divines-radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--divines-small-shadow);
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 140px;
+}
+
+.form-group label {
+    font-size: 12px;
+    color: var(--divines-muted);
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    height: var(--divines-control-height);
+    padding: 0 12px;
+    border: 1px solid var(--divines-border);
+    border-radius: 7px;
+    background: var(--divines-surface-solid);
+    color: var(--divines-text);
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--divines-accent);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--divines-accent-soft);
+}
+
+/* ============================================================
+   提交按钮
+   ============================================================ */
+
+.submit-btn {
+    height: var(--divines-control-height);
+    padding: 0 24px;
+    background: var(--divines-accent);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.submit-btn:hover {
+    opacity: 0.92;
+}
+
+.submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================================
+   选项区域
+   ============================================================ */
+
+.options-section {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--divines-panel-soft);
+    border-radius: var(--divines-radius);
+    border: 1px solid var(--divines-border);
+}
+
+.options-section h4 {
+    font-size: 12px;
+    color: var(--divines-muted);
+    margin-bottom: 8px;
+}
+
+.options-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.option-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--divines-text);
+}
+
+.option-label input[type="checkbox"] {
+    accent-color: var(--divines-accent);
+    width: 16px;
+    height: 16px;
+}
+
+.option-hint {
+    font-size: 11px;
+    color: var(--divines-muted);
+    margin-left: 4px;
+}
+
+.form-group-inline {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group-inline label {
+    font-size: 13px;
+    color: var(--divines-muted);
+}
+
+.form-group-inline input {
+    width: 80px;
+    height: var(--divines-control-height);
+    padding: 0 8px;
+    border: 1px solid var(--divines-border);
+    border-radius: 7px;
+    background: var(--divines-surface-solid);
+    color: var(--divines-text);
+    font-size: 13px;
+}
+
+/* ============================================================
+   结果卡片
+   ============================================================ */
+
+.result-card {
+    background: var(--divines-panel-bg);
+    border: 1px solid var(--divines-border);
+    border-radius: var(--divines-radius);
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: var(--divines-small-shadow);
+}
+
+.result-card h3 {
+    color: var(--divines-accent);
+    margin-bottom: 16px;
+    font-size: 17px;
+}
+
+.result-card h4 {
+    color: var(--divines-text);
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.section {
+    margin-bottom: 20px;
+}
+
+/* ============================================================
+   数据表格
+   ============================================================ */
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 13px;
+}
+
+.data-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--divines-panel-soft);
+    color: var(--divines-muted);
+    font-weight: 600;
+    font-size: 12px;
+    border-bottom: 1px solid var(--divines-border-strong);
+}
+
+.data-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--divines-border);
+    color: var(--divines-text);
+}
+
+.data-table tr:nth-child(even) td {
+    background: var(--divines-table-row-alt);
+}
+
+.data-table tr:hover td {
+    background: var(--divines-accent-soft);
+}
+
+/* ============================================================
+   四柱显示
+   ============================================================ */
+
+.bazi-pillars {
+    margin-bottom: 20px;
+}
+
+.pillar-grid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pillar-item {
+    flex: 1;
+    min-width: 90px;
+    background: var(--divines-surface-solid);
+    border: 1px solid var(--divines-border);
+    border-radius: var(--divines-radius);
+    padding: 14px 12px;
+    text-align: center;
+    box-shadow: var(--divines-small-shadow);
+}
+
+.pillar-label {
+    font-size: 11px;
+    color: var(--divines-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.pillar-tg {
+    font-size: 26px;
+    color: var(--divines-accent);
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.pillar-dz {
+    font-size: 22px;
+    color: var(--divines-text);
+    font-weight: 600;
+}
+
+/* ============================================================
+   日主显示
+   ============================================================ */
+
+.day-master {
+    margin: 16px 0;
+    padding: 10px 16px;
+    background: var(--divines-surface-solid);
+    border: 1px solid var(--divines-border);
+    border-radius: var(--divines-radius);
+    font-size: 15px;
+}
+
+.day-master strong {
+    color: var(--divines-accent);
+    font-size: 18px;
+}
+
+/* ============================================================
+   网格项（十神、纳音、长生、四化等）
+   ============================================================ */
+
+.ten-god-grid,
+.na-yin-grid,
+.chang-sheng-grid,
+.si-hua-grid {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.ten-god-item,
+.na-yin-item,
+.chang-sheng-item,
+.si-hua-item {
+    background: var(--divines-surface-solid);
+    border: 1px solid var(--divines-border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    box-shadow: var(--divines-small-shadow);
+}
+
+.ten-god-value,
+.chang-sheng-value {
+    color: var(--divines-accent);
+    font-weight: 600;
+}
+
+.si-hua-label {
+    color: var(--divines-muted);
+    font-weight: 500;
+}
+
+.hidden-value {
+    color: var(--divines-accent);
+    font-weight: 600;
+}
+
+/* ============================================================
+   信息标签（起运、紫微、校正时辰等）
+   ============================================================ */
+
+.qi-yun,
+.zw-info,
+.adjusted-hour {
+    margin: 8px 0;
+    padding: 8px 14px;
+    background: var(--divines-surface-solid);
+    border: 1px solid var(--divines-border);
+    border-radius: 6px;
+    display: inline-block;
+    margin-right: 10px;
+    font-size: 13px;
+    color: var(--divines-text-soft);
+}
+
+.qi-yun strong,
+.zw-info strong {
+    color: var(--divines-accent);
+}
+
+/* ============================================================
+   标签页按钮（子标签）
+   ============================================================ */
+
+.tab-buttons {
+    display: flex;
+    gap: 0;
+    margin: 16px 0;
+    border-bottom: 2px solid var(--divines-border);
+    overflow-x: auto;
+}
+
+.tab-btn {
+    padding: 8px 18px;
+    background: none;
+    border: none;
+    color: var(--divines-muted);
+    font-size: 13px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+}
+
+.tab-btn:hover {
+    color: var(--divines-text);
+}
+
+.tab-btn.active {
+    color: var(--divines-accent);
+    border-bottom-color: var(--divines-accent);
+    font-weight: 600;
+}
+
+/* ============================================================
+   状态提示
+   ============================================================ */
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--divines-muted);
+    font-size: 14px;
+}
+
+.error-message {
+    color: var(--divines-danger);
+    padding: 12px;
+    background: rgba(207, 19, 34, 0.08);
+    border: 1px solid rgba(207, 19, 34, 0.2);
+    border-radius: var(--divines-radius);
+    margin: 12px 0;
+    font-size: 13px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 48px;
+    color: var(--divines-muted);
+}
+
+/* ============================================================
+   黄历样式
+   ============================================================ */
+
+.jieqi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+}
+
+.jieqi-item {
+    background: var(--divines-surface-solid);
+    border: 1px solid var(--divines-border);
+    border-radius: var(--divines-radius);
+    padding: 10px 14px;
+    box-shadow: var(--divines-small-shadow);
+}
+
+.jieqi-name {
+    font-size: 14px;
+    color: var(--divines-accent);
+    font-weight: 600;
+}
+
+.jieqi-date {
+    font-size: 12px;
+    color: var(--divines-text);
+    margin-top: 4px;
+}
+
+.jieqi-type {
+    font-size: 11px;
+    color: var(--divines-muted);
+    margin-top: 2px;
+}
+
+.lunar-card .lunar-info {
+    padding: 16px;
+}
+
+.lunar-row {
+    display: flex;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.lunar-label {
+    color: var(--divines-muted);
+    min-width: 80px;
+}
+
+.lunar-value {
+    color: var(--divines-text);
+    font-weight: 500;
+}
+
+.lunar-leap {
+    color: var(--divines-accent);
+    font-weight: 600;
+}
+
+/* ============================================================
+   滚动条
+   ============================================================ */
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--divines-border-strong);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--divines-muted);
+}
+
+/* ============================================================
+   底栏
+   ============================================================ */
+
+.divines-app-footer {
+    padding: 12px 24px;
+    text-align: center;
+    color: var(--divines-muted);
+    font-size: 12px;
+    border-top: 1px solid var(--divines-border);
+    background: var(--divines-surface);
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+/* ============================================================
+   动画
+   ============================================================ */
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   响应式设计
+   ============================================================ */
+
+@media (max-width: 1500px) {
+    .divines-userbox {
+        grid-template-columns: 150px minmax(0, 1fr) 342px;
+        gap: 8px;
+        padding: 0 10px;
+    }
+
+    .divines-brand-text {
+        font-size: 20px;
+    }
+
+    .divines-brand-mark {
+        width: 34px;
+        height: 34px;
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 1320px) {
+    .divines-userbox {
+        grid-template-columns: 104px minmax(0, 1fr) 260px;
+    }
+
+    .divines-brand-text {
+        display: none;
+    }
+
+    .divines-name {
+        display: none;
+    }
+
+    .divines-account {
+        gap: 0;
+        padding: 0 7px;
+    }
+}
+
+@media (max-width: 1180px) {
+    .divines-userbox {
+        grid-template-columns: 74px minmax(0, 1fr) 192px;
+        gap: 6px;
+    }
+
+    .divines-brand-mark {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+@media (max-width: 768px) {
+    .divines-nav-tabs {
+        width: 56px;
+    }
+
+    .divines-nav-tab {
+        justify-content: center;
+        padding: 8px;
+    }
+
+    .divines-nav-tab-label {
+        display: none;
+    }
+
+    .divines-nav-tab-group-header {
+        display: none;
+    }
+
+    .page {
+        padding: 12px;
+    }
+
+    .divines-userbox {
+        grid-template-columns: 48px minmax(0, 1fr) 92px;
+        gap: 6px;
+        padding: 0 8px;
+    }
+
+    .divines-brand-button {
+        width: 40px;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .divines-brand-mark {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+
+    .divines-astro-command-center {
+        display: none;
+    }
+
+    .divines-astro-utility-bar {
+        gap: 6px;
+    }
+
+    .divines-account {
+        width: 32px;
+        height: 32px;
+        justify-content: center;
+    }
+}
+
+/* 打印适配 */
+@media print {
+    .divines-nav-tabs,
+    .divines-astro-header,
+    .divines-app-footer {
+        display: none;
+    }
+}

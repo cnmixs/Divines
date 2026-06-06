@@ -1,0 +1,31 @@
+﻿[package]
+name = "divines-web"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Divines - Dioxus 前端 Web 应用"
+
+[dependencies]
+divines-core.workspace = true
+divines-calc.workspace = true
+
+dioxus = { workspace = true, features = ["router"] }
+dioxus-router.workspace = true
+dioxus-web.workspace = true
+dioxus-desktop = { workspace = true, optional = true }
+dioxus-logger.workspace = true
+dioxus-signals.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+reqwest.workspace = true
+tracing.workspace = true
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = ["console"] }
+js-sys = "0.3"
+
+[features]
+default = ["web"]
+web = ["dioxus/web"]
+desktop = ["dioxus/desktop", "dioxus-desktop"]
+mobile = ["dioxus/mobile"]

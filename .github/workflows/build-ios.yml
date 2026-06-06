@@ -1,4 +1,4 @@
-name: Build iOS IPA
+﻿name: Build iOS IPA
 
 on:
   workflow_dispatch:
@@ -50,7 +50,7 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode.app
 
       - name: Build iOS IPA
-        working-directory: crates/horosa-web
+        working-directory: crates/divines-web
         run: dx bundle --platform ios --release
         env:
           CODE_SIGN_IDENTITY: ""
@@ -71,9 +71,9 @@ jobs:
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: horosa-ios-ipa
+          name: divines-ios-ipa
           path: |
-            crates/horosa-web/dist/**/*.ipa
-            crates/horosa-web/gen/**/*.ipa
+            crates/divines-web/dist/**/*.ipa
+            crates/divines-web/gen/**/*.ipa
             target/**/*.ipa
           if-no-files-found: warn
