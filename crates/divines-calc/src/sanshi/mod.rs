@@ -1,4 +1,4 @@
-﻿// Divines - 三式计算引擎（奇门、太乙、六壬）
+// Divines - 三式计算引擎（奇门、太乙、六壬）
 // 参考原项目: vendor/kinqimen/, vendor/kintaiyi/, vendor/kinastro/astro/sanshi/
 
 use chrono::{Datelike, Timelike};
@@ -36,8 +36,6 @@ mod constants {
     pub const DOOR_R: [&str; 8] = ["休", "生", "傷", "杜", "景", "死", "驚", "開"];
     /// 九星名称
     pub const STAR_R: [&str; 9] = ["蓬", "任", "沖", "輔", "英", "禽", "柱", "心", "芮"];
-    /// 八神名称（阳遁序）
-    pub const GOD_YANG: [&str; 8] = ["符", "蛇", "陰", "合", "勾", "雀", "地", "天"];
     /// 八神全称（阳遁序）
     pub const GOD_YANG_FULL: [&str; 8] = ["值符", "螣蛇", "太陰", "六合", "勾陳", "朱雀", "九地", "九天"];
     /// 八神全称（阴遁序）
