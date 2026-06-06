@@ -171,11 +171,11 @@ pub fn AstroNatal() -> Element {
                                 tbody {
                                     for planet in planets {
                                         tr {
-                                            td { "{planet.get("planet").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                            td { "{planet.get("sign").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                            td { "{planet.get("degree_in_sign").and_then(|v| v.as_f64()).unwrap_or(0.0):.2}掳" }
-                                            td { "{planet.get("house").and_then(|v| v.as_u64()).unwrap_or(0)}" }
-                                            td { "{planet.get("is_retrograde").and_then(|v| v.as_bool()).unwrap_or(false)}" }
+                                            td { {planet.get("planet").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                            td { {planet.get("sign").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                            td { {format!("{:.2}掳", planet.get("degree_in_sign").and_then(|v| v.as_f64()).unwrap_or(0.0))} }
+                                            td { {planet.get("house").and_then(|v| v.as_u64()).unwrap_or(0)} }
+                                            td { {planet.get("is_retrograde").and_then(|v| v.as_bool()).unwrap_or(false)} }
                                         }
                                     }
                                 }
@@ -198,11 +198,11 @@ pub fn AstroNatal() -> Element {
                                 tbody {
                                     for aspect in aspects {
                                         tr {
-                                            td { "{aspect.get("planet1").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                            td { "{aspect.get("planet2").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                            td { "{aspect.get("aspect_type").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                            td { "{aspect.get("angle").and_then(|v| v.as_f64()).unwrap_or(0.0):.2}掳" }
-                                            td { "{aspect.get("orb").and_then(|v| v.as_f64()).unwrap_or(0.0):.2}掳" }
+                                            td { {aspect.get("planet1").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                            td { {aspect.get("planet2").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                            td { {aspect.get("aspect_type").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                            td { {format!("{:.2}掳", aspect.get("angle").and_then(|v| v.as_f64()).unwrap_or(0.0))} }
+                                            td { {format!("{:.2}掳", aspect.get("orb").and_then(|v| v.as_f64()).unwrap_or(0.0))} }
                                         }
                                     }
                                 }
@@ -572,12 +572,12 @@ pub fn AstroQizheng() -> Element {
                                 tbody {
                                     for p in planets {
                                         tr {
-                                            td { "{p.get("name_zh").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                            td { "{p.get("longitude").and_then(|v| v.as_f64()).unwrap_or(0.0):.2}掳" }
-                                            td { "{p.get("sign_zh").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                            td { "{p.get("house").and_then(|v| v.as_u64()).unwrap_or(0)}" }
-                                            td { "{p.get("su_name").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                            td { "{p.get("is_retrograde").and_then(|v| v.as_bool()).unwrap_or(false)}" }
+                                            td { {p.get("name_zh").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                            td { {format!("{:.2}掳", p.get("longitude").and_then(|v| v.as_f64()).unwrap_or(0.0))} }
+                                            td { {p.get("sign_zh").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                            td { {p.get("house").and_then(|v| v.as_u64()).unwrap_or(0)} }
+                                            td { {p.get("su_name").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                            td { {p.get("is_retrograde").and_then(|v| v.as_bool()).unwrap_or(false)} }
                                         }
                                     }
                                 }
@@ -592,10 +592,10 @@ pub fn AstroQizheng() -> Element {
                                 tbody {
                                     for h in houses {
                                         tr {
-                                            td { "{h.get("house_num").and_then(|v| v.as_u64()).unwrap_or(0)}" }
-                                            td { "{h.get("name_zh").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                            td { "{h.get("sign_zh").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                            td { "{h.get("cusp").and_then(|v| v.as_f64()).unwrap_or(0.0):.2}掳" }
+                                            td { {h.get("house_num").and_then(|v| v.as_u64()).unwrap_or(0)} }
+                                            td { {h.get("name_zh").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                            td { {h.get("sign_zh").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                            td { {format!("{:.2}掳", h.get("cusp").and_then(|v| v.as_f64()).unwrap_or(0.0))} }
                                         }
                                     }
                                 }
@@ -606,7 +606,7 @@ pub fn AstroQizheng() -> Element {
                         if !patterns.is_empty() {
                             div { class: "section",
                                 h4 { "鏍煎眬" }
-                                ul { for p in patterns { li { "{p.as_str().unwrap_or("?")}" } } }
+                                ul { for p in patterns { li { {p.as_str().unwrap_or("?")} } } }
                             }
                         }
                     }
@@ -619,9 +619,9 @@ pub fn AstroQizheng() -> Element {
                                     tbody {
                                         for dw in dongwei {
                                             tr {
-                                                td { "{dw.get("start_age").and_then(|v| v.as_u64()).unwrap_or(0)}-{dw.get("end_age").and_then(|v| v.as_u64()).unwrap_or(0)}宀? }
-                                                td { "{dw.get("house_name").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                                td { "{dw.get("description").and_then(|v| v.as_str()).unwrap_or("?")}" }
+                                                td { {format!("{}-{}宀?", dw.get("start_age").and_then(|v| v.as_u64()).unwrap_or(0), dw.get("end_age").and_then(|v| v.as_u64()).unwrap_or(0))} }
+                                                td { {dw.get("house_name").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                                td { {dw.get("description").and_then(|v| v.as_str()).unwrap_or("?")} }
                                             }
                                         }
                                     }
@@ -801,10 +801,10 @@ pub fn Bazi() -> Element {
                                     }
                                     if let Some(pillar) = data.get(pillar_key) {
                                         div { class: "pillar-tg",
-                                            "{pillar.get("tian_gan").and_then(|v| v.as_str()).unwrap_or("?")}"
+                                            {pillar.get("tian_gan").and_then(|v| v.as_str()).unwrap_or("?")}
                                         }
                                         div { class: "pillar-dz",
-                                            "{pillar.get("di_zhi").and_then(|v| v.as_str()).unwrap_or("?")}"
+                                            {pillar.get("di_zhi").and_then(|v| v.as_str()).unwrap_or("?")}
                                         }
                                     }
                                 }
@@ -835,7 +835,7 @@ pub fn Bazi() -> Element {
                                     div { class: "ten-god-item",
                                         span { "{label}: " }
                                         span { class: "ten-god-value",
-                                            "{ten_gods.get(key).and_then(|v| v.as_str()).unwrap_or("?")}"
+                                            {ten_gods.get(key).and_then(|v| v.as_str()).unwrap_or("?")}
                                         }
                                     }
                                 }
@@ -851,7 +851,7 @@ pub fn Bazi() -> Element {
                                     div { class: "chang-sheng-item",
                                         span { "{label}: " }
                                         span { class: "chang-sheng-value",
-                                            "{chang_sheng.get(key).and_then(|v| v.as_str()).unwrap_or("?")}"
+                                            {chang_sheng.get(key).and_then(|v| v.as_str()).unwrap_or("?")}
                                         }
                                     }
                                 }
@@ -867,7 +867,7 @@ pub fn Bazi() -> Element {
                                 for (key, label) in [("year", "骞?), ("month", "鏈?), ("day", "鏃?), ("hour", "鏃?)] {
                                     div { class: "na-yin-item",
                                         span { "{label}: " }
-                                        span { "{na_yin.get(key).and_then(|v| v.as_str()).unwrap_or("?")}" }
+                                        span { {na_yin.get(key).and_then(|v| v.as_str()).unwrap_or("?")} }
                                     }
                                 }
                             }
@@ -909,13 +909,13 @@ pub fn Bazi() -> Element {
                                     tbody {
                                         for rel in relations {
                                             tr {
-                                                td { "{rel.get("relation_type").and_then(|v| v.as_str()).unwrap_or("?")}" }
+                                                td { {rel.get("relation_type").and_then(|v| v.as_str()).unwrap_or("?")} }
                                                 td {
                                                     if let Some(pillars) = rel.get("pillars").and_then(|v| v.as_array()) {
                                                         {pillars.iter().filter_map(|v| v.as_str()).collect::<Vec<_>>().join("銆?)}
                                                     }
                                                 }
-                                                td { "{rel.get("detail").and_then(|v| v.as_str()).unwrap_or("")}" }
+                                                td { {rel.get("detail").and_then(|v| v.as_str()).unwrap_or("")} }
                                             }
                                         }
                                     }
@@ -940,9 +940,9 @@ pub fn Bazi() -> Element {
                                     tbody {
                                         for ss in shen_sha {
                                             tr {
-                                                td { "{ss.get("name").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                                td { "{ss.get("pillar").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                                td { "{ss.get("description").and_then(|v| v.as_str()).unwrap_or("?")}" }
+                                                td { {ss.get("name").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                                td { {ss.get("pillar").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                                td { {ss.get("description").and_then(|v| v.as_str()).unwrap_or("?")} }
                                             }
                                         }
                                     }
@@ -976,16 +976,16 @@ pub fn Bazi() -> Element {
                                     tbody {
                                         for dy in da_yun {
                                             tr {
-                                                td { "{dy.get("start_age").and_then(|v| v.as_u64()).unwrap_or(0)}-{dy.get("end_age").and_then(|v| v.as_u64()).unwrap_or(0)}宀? }
+                                                td { {format!("{}-{}宀?", dy.get("start_age").and_then(|v| v.as_u64()).unwrap_or(0), dy.get("end_age").and_then(|v| v.as_u64()).unwrap_or(0))} }
                                                 td {
-                                                    "{dy.get("pillar").and_then(|v| v.get("tian_gan")).and_then(|v| v.as_str()).unwrap_or("?")}"
+                                                    {dy.get("pillar").and_then(|v| v.get("tian_gan")).and_then(|v| v.as_str()).unwrap_or("?")}
                                                 }
                                                 td {
-                                                    "{dy.get("pillar").and_then(|v| v.get("di_zhi")).and_then(|v| v.as_str()).unwrap_or("?")}"
+                                                    {dy.get("pillar").and_then(|v| v.get("di_zhi")).and_then(|v| v.as_str()).unwrap_or("?")}
                                                 }
-                                                td { "{dy.get("ten_god").and_then(|v| v.as_str()).unwrap_or("?")}" }
+                                                td { {dy.get("ten_god").and_then(|v| v.as_str()).unwrap_or("?")} }
                                                 td {
-                                                    "{dy.get("start_year").and_then(|v| v.as_i64()).unwrap_or(0)}-{dy.get("end_year").and_then(|v| v.as_i64()).unwrap_or(0)}"
+                                                    {format!("{}-{}", dy.get("start_year").and_then(|v| v.as_i64()).unwrap_or(0), dy.get("end_year").and_then(|v| v.as_i64()).unwrap_or(0))}
                                                 }
                                             }
                                         }
@@ -1119,7 +1119,7 @@ pub fn Ziwei() -> Element {
                                         if item.len() >= 2 {
                                             div { class: "si-hua-item",
                                                 span { class: "si-hua-label", "{label}: " }
-                                                span { "{item[0].as_str().unwrap_or("?")}" }
+                                                span { {item[0].as_str().unwrap_or("?")} }
                                             }
                                         }
                                     }
@@ -1143,8 +1143,8 @@ pub fn Ziwei() -> Element {
                                 tbody {
                                     for gong in gongs {
                                         tr {
-                                            td { "{gong.get("name").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                            td { "{gong.get("di_zhi").and_then(|v| v.as_str()).unwrap_or("?")}" }
+                                            td { {gong.get("name").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                            td { {gong.get("di_zhi").and_then(|v| v.as_str()).unwrap_or("?")} }
                                             td {
                                                 if let Some(arr) = gong.get("zhu_xing").and_then(|v| v.as_array()) {
                                                     {arr.iter().filter_map(|v| v.as_str()).collect::<Vec<_>>().join("銆?)}
@@ -1178,8 +1178,8 @@ pub fn Ziwei() -> Element {
                                     tbody {
                                         for dx in da_xian {
                                             tr {
-                                                td { "{dx.get("gong_name").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                                td { "{dx.get("start_age").and_then(|v| v.as_u64()).unwrap_or(0)}-{dx.get("end_age").and_then(|v| v.as_u64()).unwrap_or(0)}宀? }
+                                                td { {dx.get("gong_name").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                                td { {format!("{}-{}宀?", dx.get("start_age").and_then(|v| v.as_u64()).unwrap_or(0), dx.get("end_age").and_then(|v| v.as_u64()).unwrap_or(0))} }
                                                 td {
                                                     if let Some(arr) = dx.get("zhu_xing").and_then(|v| v.as_array()) {
                                                         {arr.iter().filter_map(|v| v.as_str()).collect::<Vec<_>>().join("銆?)}
@@ -1373,13 +1373,13 @@ pub fn Qimen() -> Element {
                             tbody {
                                 for gong in gongs {
                                     tr {
-                                        td { "{gong.get("number").and_then(|v| v.as_u64()).unwrap_or(0)}" }
-                                        td { "{gong.get("ba_gua").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                        td { "{gong.get("tian_pan_gan").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                        td { "{gong.get("di_pan_gan").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                        td { "{gong.get("ba_men").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                        td { "{gong.get("jiu_xing").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                        td { "{gong.get("ba_shen").and_then(|v| v.as_str()).unwrap_or("?")}" }
+                                        td { {gong.get("number").and_then(|v| v.as_u64()).unwrap_or(0)} }
+                                        td { {gong.get("ba_gua").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                        td { {gong.get("tian_pan_gan").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                        td { {gong.get("di_pan_gan").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                        td { {gong.get("ba_men").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                        td { {gong.get("jiu_xing").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                        td { {gong.get("ba_shen").and_then(|v| v.as_str()).unwrap_or("?")} }
                                     }
                                 }
                             }
@@ -1945,18 +1945,18 @@ pub fn Almanac() -> Element {
                                         div { class: "lunar-row",
                                             span { class: "lunar-label", "鍐滃巻鏃ユ湡: " }
                                             span { class: "lunar-value",
-                                                "{data.get("year").and_then(|v| v.as_i64()).unwrap_or(0)}骞?
+                                                {data.get("year").and_then(|v| v.as_i64()).unwrap_or(0)} "骞?
                                                 {data.get("month_name_zh").and_then(|v| v.as_str()).unwrap_or("?")}
                                                 {data.get("day_name_zh").and_then(|v| v.as_str()).unwrap_or("?")}
                                             }
                                         }
                                         div { class: "lunar-row",
                                             span { class: "lunar-label", "骞村共鏀? " }
-                                            span { class: "lunar-value", "{data.get("year_ganzhi").and_then(|v| v.as_str()).unwrap_or("?")}" }
+                                            span { class: "lunar-value", {data.get("year_ganzhi").and_then(|v| v.as_str()).unwrap_or("?")} }
                                         }
                                         div { class: "lunar-row",
                                             span { class: "lunar-label", "鐢熻倴: " }
-                                            span { class: "lunar-value", "{data.get("zodiac_animal").and_then(|v| v.as_str()).unwrap_or("?")}" }
+                                            span { class: "lunar-value", {data.get("zodiac_animal").and_then(|v| v.as_str()).unwrap_or("?")} }
                                         }
                                         if let Some(leap) = data.get("is_leap_month").and_then(|v| v.as_bool()) {
                                             if leap {
@@ -1983,9 +1983,9 @@ pub fn Almanac() -> Element {
                                     h3 { "骞叉敮淇℃伅" }
                                     table { class: "data-table",
                                         tbody {
-                                            tr { td { "骞村共鏀? } td { "{data.get("year_ganzhi").and_then(|v| v.as_str()).unwrap_or("?")}" } }
-                                            tr { td { "鐢熻倴" } td { "{data.get("zodiac").and_then(|v| v.as_str()).unwrap_or("?")}" } }
-                                            tr { td { "骞村彿" } td { "{data.get("nianhao").and_then(|v| v.as_str()).unwrap_or("?")}" } }
+                                            tr { td { "骞村共鏀? } td { {data.get("year_ganzhi").and_then(|v| v.as_str()).unwrap_or("?")} } }
+                                            tr { td { "鐢熻倴" } td { {data.get("zodiac").and_then(|v| v.as_str()).unwrap_or("?")} } }
+                                            tr { td { "骞村彿" } td { {data.get("nianhao").and_then(|v| v.as_str()).unwrap_or("?")} } }
                                         }
                                     }
                                 }
@@ -2018,9 +2018,9 @@ pub fn Almanac() -> Element {
                                                 tbody {
                                                     for eclipse in list {
                                                         tr {
-                                                            td { "{eclipse.get("date").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                                            td { "{eclipse.get("eclipse_type").and_then(|v| v.as_str()).unwrap_or("?")}" }
-                                                            td { "{eclipse.get("magnitude").and_then(|v| v.as_f64()).unwrap_or(0.0):.3}" }
+                                                            td { {eclipse.get("date").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                                            td { {eclipse.get("eclipse_type").and_then(|v| v.as_str()).unwrap_or("?")} }
+                                                            td { {format!("{:.3}", eclipse.get("magnitude").and_then(|v| v.as_f64()).unwrap_or(0.0))} }
                                                         }
                                                     }
                                                 }
