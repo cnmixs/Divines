@@ -1,0 +1,43 @@
+# Rust
+target/
+**/*.rs.bk
+*.pdb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Data (runtime)
+data/user/
+*.db-journal
+*.db-wal
+
+# Vendor (too large, use crates.io on CI)
+vendor/
+
+# Build artifacts
+target2/
+test-proc/target/
+
+# Original reference source
+horosa-original/

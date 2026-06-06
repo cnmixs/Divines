@@ -1,0 +1,74 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Create release'
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 移除 vendor 覆盖，让 GitHub Actions 直接从 crates.io 拉取依赖
+      - name: Remove vendor override
+        run: rm -f .cargo/config.toml
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-ios-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-ios-
+
+      - name: Install dioxus-cli (via binstall)
+        run: |
+          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+          cargo binstall dioxus-cli --version 0.7.9 -y
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Build iOS IPA
+        working-directory: crates/horosa-web
+        run: dx bundle --platform ios --release
+        env:
+          CODE_SIGN_IDENTITY: ""
+          CODE_SIGNING_REQUIRED: "NO"
+          DEVELOPMENT_TEAM: ""
+
+      - name: Find IPA
+        id: find-ipa
+        run: |
+          echo "Searching for IPA..."
+          find . -name "*.ipa" -type f 2>/dev/null || true
+          find . -name "*.app" -type d 2>/dev/null || true
+          IPA=$(find . -name "*.ipa" -type f 2>/dev/null | head -1)
+          if [ -n "$IPA" ]; then
+            echo "ipa_path=$IPA" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: horosa-ios-ipa
+          path: |
+            crates/horosa-web/dist/**/*.ipa
+            crates/horosa-web/gen/**/*.ipa
+            target/**/*.ipa
+          if-no-files-found: warn

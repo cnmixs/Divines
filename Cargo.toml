@@ -1,0 +1,64 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/horosa-core",
+    "crates/horosa-calc",
+    "crates/horosa-server",
+    "crates/horosa-web",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+authors = ["Horosa Rust Rewrite"]
+description = "星阙 Horosa - 占星与中国术数工作站，纯 Rust 全栈重写"
+
+[workspace.dependencies]
+# 序列化
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+
+# 日期时间
+chrono = { version = "0.4", features = ["serde"] }
+time = "0.3"
+
+# 异步运行时
+tokio = { version = "1", features = ["full"] }
+axum = { version = "0.8", features = ["ws", "multipart"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "fs", "trace"] }
+
+# 数据库 / 本地存储
+sled = "0.34"
+sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio", "chrono"] }
+
+# 日志
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# 工具
+anyhow = "1"
+thiserror = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+reqwest = { version = "0.12", features = ["json", "stream"] }
+base64 = "0.22"
+sha2 = "0.10"
+flate2 = "1"
+zip = "2"
+
+# Dioxus 前端
+dioxus = { version = "0.7.9", default-features = false }
+dioxus-router = "0.7.9"
+dioxus-fullstack = "0.7.9"
+dioxus-web = "0.7.9"
+dioxus-desktop = "0.7.9"
+dioxus-logger = "0.7.9"
+dioxus-signals = "0.7.9"
+
+# 内部 crate
+horosa-core = { path = "crates/horosa-core" }
+horosa-calc = { path = "crates/horosa-calc" }
+horosa-server = { path = "crates/horosa-server" }
+horosa-web = { path = "crates/horosa-web" }

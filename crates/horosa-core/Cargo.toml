@@ -1,0 +1,14 @@
+[package]
+name = "horosa-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "星阙 Horosa - 共享类型、模型、常量和错误定义"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+time.workspace = true
+uuid.workspace = true
+thiserror.workspace = true
