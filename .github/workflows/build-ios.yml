@@ -2,11 +2,6 @@ name: Build iOS IPA
 
 on:
   workflow_dispatch:
-    inputs:
-      release:
-        description: 'Create release'
-        type: boolean
-        default: false
   push:
     branches: [main]
 
@@ -16,7 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 移除 vendor 覆盖，让 GitHub Actions 直接从 crates.io 拉取依赖
       - name: Remove vendor override
         run: rm -f .cargo/config.toml
 
@@ -36,7 +30,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-ios-
 
-      - name: Install OpenSSL (required by dioxus-cli)
+      - name: Install OpenSSL
         run: brew install openssl@3
 
       - name: Install dioxus-cli
@@ -52,33 +46,98 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
 
-      - name: Build iOS IPA
+      - name: Build iOS app
         working-directory: crates/divines-web
-        run: dx bundle --platform ios --release
+        run: dx build --platform ios --release --features mobile
         env:
           CARGO_HTTP_MULTIPLEXING: "false"
           CARGO_NET_RETRY: "5"
-          CODE_SIGN_IDENTITY: ""
-          CODE_SIGNING_REQUIRED: "NO"
-          DEVELOPMENT_TEAM: ""
 
-      - name: Find IPA
-        id: find-ipa
+      - name: Fix app bundle
         run: |
-          echo "Searching for IPA..."
-          find . -name "*.ipa" -type f 2>/dev/null || true
-          find . -name "*.app" -type d 2>/dev/null || true
-          IPA=$(find . -name "*.ipa" -type f 2>/dev/null | head -1)
-          if [ -n "$IPA" ]; then
-            echo "ipa_path=$IPA" >> $GITHUB_OUTPUT
+          APP_PATH=$(find . -name "*.app" -type d 2>/dev/null | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app found"
+            exit 1
+          fi
+          echo "Found app: $APP_PATH"
+          
+          EXEC_NAME=$(find "$APP_PATH" -maxdepth 1 -type f ! -name "*.plist" ! -name "*.json" | head -1 | xargs basename)
+          if [ -n "$EXEC_NAME" ] && [ "$EXEC_NAME" != "DivinesWeb" ]; then
+            echo "Renaming executable from $EXEC_NAME to DivinesWeb"
+            mv "$APP_PATH/$EXEC_NAME" "$APP_PATH/DivinesWeb"
+            chmod +x "$APP_PATH/DivinesWeb"
+          fi
+          
+          if [ -d "$APP_PATH/divines-web" ]; then
+            echo "Removing leftover directory"
+            rm -rf "$APP_PATH/divines-web"
+          fi
+          
+          if [ -d "$APP_PATH/Frameworks" ]; then
+            echo "Removing embedded Frameworks"
+            rm -rf "$APP_PATH/Frameworks"
+          fi
+          
+          if [ -d "$APP_PATH/assets" ]; then
+            echo "Removing assets"
+            rm -rf "$APP_PATH/assets"
+          fi
+          
+          # Rename .app directory to match executable name
+          PARENT_DIR=$(dirname "$APP_PATH")
+          if [ "$(basename "$APP_PATH")" != "DivinesWeb.app" ]; then
+            NEW_APP_PATH="$PARENT_DIR/DivinesWeb.app"
+            mv "$APP_PATH" "$NEW_APP_PATH"
+            APP_PATH="$NEW_APP_PATH"
+            echo "Renamed app bundle to: $APP_PATH"
+          fi
+          
+          printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' '<plist version="1.0">' '<dict>' '    <key>CFBundleDevelopmentRegion</key>' '    <string>zh_CN</string>' '    <key>CFBundleDisplayName</key>' '    <string>Divines</string>' '    <key>CFBundleExecutable</key>' '    <string>DivinesWeb</string>' '    <key>CFBundleIdentifier</key>' '    <string>com.divines.app</string>' '    <key>CFBundleInfoDictionaryVersion</key>' '    <string>6.0</string>' '    <key>CFBundleName</key>' '    <string>Divines</string>' '    <key>CFBundlePackageType</key>' '    <string>APPL</string>' '    <key>CFBundleShortVersionString</key>' '    <string>0.1.0</string>' '    <key>CFBundleVersion</key>' '    <string>1</string>' '    <key>LSRequiresIPhoneOS</key>' '    <true/>' '    <key>MinimumOSVersion</key>' '    <string>14.0</string>' '    <key>UILaunchScreen</key>' '    <dict/>' '    <key>UIRequiredDeviceCapabilities</key>' '    <array>' '        <string>arm64</string>' '    </array>' '    <key>UISupportedInterfaceOrientations</key>' '    <array>' '        <string>UIInterfaceOrientationPortrait</string>' '        <string>UIInterfaceOrientationLandscapeLeft</string>' '        <string>UIInterfaceOrientationLandscapeRight</string>' '    </array>' '    <key>UISupportedInterfaceOrientations~ipad</key>' '    <array>' '        <string>UIInterfaceOrientationPortrait</string>' '        <string>UIInterfaceOrientationPortraitUpsideDown</string>' '        <string>UIInterfaceOrientationLandscapeLeft</string>' '        <string>UIInterfaceOrientationLandscapeRight</string>' '    </array>' '    <key>UIViewControllerBasedStatusBarAppearance</key>' '    <false/>' '</dict>' '</plist>' > "$APP_PATH/Info.plist"
+          
+          mkdir -p "$APP_PATH/_CodeSignature"
+          
+          printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' '<plist version="1.0">' '<dict>' '    <key>files</key>' '    <dict>' '        <key>Info.plist</key>' '        <data>' '        OECBYXg7w1YcRH0ZVThyAdpGIEk=' '        </data>' '    </dict>' '    <key>files2</key>' '    <dict/>' '    <key>rules</key>' '    <dict>' '        <key>^.*</key>' '        <true/>' '        <key>^.*\.lproj/</key>' '        <dict>' '            <key>optional</key>' '            <true/>' '            <key>weight</key>' '            <real>1000</real>' '        </dict>' '        <key>^.*\.lproj/locversion.plist$</key>' '        <dict>' '            <key>omit</key>' '            <true/>' '            <key>weight</key>' '            <real>1100</real>' '        </dict>' '        <key>^Base\.lproj/</key>' '        <dict>' '            <key>weight</key>' '            <real>1010</real>' '        </dict>' '        <key>^version.plist$</key>' '        <true/>' '    </dict>' '    <key>rules2</key>' '    <dict>' '        <key>.*\.dSYM($|/)</key>' '        <dict>' '            <key>weight</key>' '            <real>11</real>' '        </dict>' '        <key>^(.*/)?\.DS_Store$</key>' '        <dict>' '            <key>omit</key>' '            <true/>' '            <key>weight</key>' '            <real>2000</real>' '        </dict>' '        <key>^.*</key>' '        <true/>' '        <key>^.*\.lproj/</key>' '        <dict>' '            <key>optional</key>' '            <true/>' '            <key>weight</key>' '            <real>1000</real>' '        </dict>' '        <key>^.*\.lproj/locversion.plist$</key>' '        <dict>' '            <key>omit</key>' '            <true/>' '            <key>weight</key>' '            <real>1100</real>' '        </dict>' '        <key>^Base\.lproj/</key>' '        <dict>' '            <key>weight</key>' '            <real>1010</real>' '        </dict>' '        <key>^Info\.plist$</key>' '        <dict>' '            <key>omit</key>' '            <true/>' '            <key>weight</key>' '            <real>20</real>' '        </dict>' '        <key>^PkgInfo$</key>' '        <dict>' '            <key>omit</key>' '            <true/>' '            <key>weight</key>' '            <real>20</real>' '        </dict>' '        <key>^embedded\.provisionprofile$</key>' '        <dict>' '            <key>weight</key>' '            <real>20</real>' '        </dict>' '        <key>^version\.plist$</key>' '        <dict>' '            <key>weight</key>' '            <real>20</real>' '        </dict>' '    </dict>' '</dict>' '</plist>' > "$APP_PATH/_CodeSignature/CodeResources"
+          
+          codesign --force --sign - "$APP_PATH"
+          codesign -dv "$APP_PATH" 2>&1 || echo "Codesign verification failed"
+          
+          echo "=== Fixed app ==="
+          ls -la "$APP_PATH"
+
+      - name: Package IPA
+        run: |
+          APP_PATH=$(find . -name "*.app" -type d 2>/dev/null | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app found"
+            exit 1
+          fi
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/
+          IPA_NAME="Divines-unsigned.ipa"
+          zip -r "$IPA_NAME" Payload
+          rm -rf Payload
+          echo "Created IPA: $IPA_NAME"
+
+      - name: Delete old artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          artifacts=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/actions/artifacts?name=divines-ios-ipa&per_page=100")
+          count=$(echo "$artifacts" | jq '.total_count // 0')
+          if [ "$count" -gt 0 ]; then
+            echo "$artifacts" | jq -r '.artifacts[].id' | while read -r id; do
+              curl -s -X DELETE -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "${{ github.api_url }}/repos/${{ github.repository }}/actions/artifacts/$id"
+            done
           fi
 
-      - name: Upload IPA artifact
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: divines-ios-ipa
-          path: |
-            crates/divines-web/dist/**/*.ipa
-            crates/divines-web/gen/**/*.ipa
-            target/**/*.ipa
+          path: ./*.ipa
           if-no-files-found: warn
