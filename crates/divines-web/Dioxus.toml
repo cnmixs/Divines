@@ -1,5 +1,5 @@
 [application]
-name = "divines-web"
+name = "DivinesWeb"
 default_platform = "web"
 out_dir = "dist"
 asset_dir = "assets"
@@ -37,6 +37,7 @@ deployment_target = "14.0"
 
 [ios.app]
 title = "Divines"
+info_plist = "Info.plist"
 
 [ios.resource]
 style = ["assets/styles.css"]
