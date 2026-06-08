@@ -1,4 +1,4 @@
-﻿[package]
+[package]
 name = "divines-web"
 version.workspace = true
 edition.workspace = true
@@ -9,9 +9,9 @@ description = "Divines - Dioxus 前端 Web 应用"
 divines-core.workspace = true
 divines-calc.workspace = true
 
-dioxus = { workspace = true, features = ["router"] }
+dioxus = { workspace = true, features = ["router", "launch", "signals", "html", "macro", "hooks"] }
 dioxus-router.workspace = true
-dioxus-web.workspace = true
+dioxus-web = { workspace = true, optional = true }
 dioxus-desktop = { workspace = true, optional = true }
 dioxus-logger.workspace = true
 dioxus-signals.workspace = true
@@ -20,12 +20,13 @@ serde_json.workspace = true
 chrono.workspace = true
 reqwest.workspace = true
 tracing.workspace = true
-wasm-bindgen = "0.2"
-web-sys = { version = "0.3", features = ["console"] }
-js-sys = "0.3"
+wasm-bindgen = { version = "0.2", optional = true }
+web-sys = { version = "0.3", features = ["console"], optional = true }
+js-sys = { version = "0.3", optional = true }
+rand = "0.8"
 
 [features]
 default = ["web"]
-web = ["dioxus/web"]
+web = ["dioxus/web", "dioxus-web", "wasm-bindgen", "web-sys", "js-sys"]
 desktop = ["dioxus/desktop", "dioxus-desktop"]
-mobile = ["dioxus/mobile"]
+mobile = ["dioxus/mobile", "dioxus-desktop"]
