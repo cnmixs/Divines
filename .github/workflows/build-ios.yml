@@ -5,6 +5,10 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: ios-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-ios:
     runs-on: macos-latest
@@ -53,7 +57,7 @@ jobs:
           CARGO_HTTP_MULTIPLEXING: "false"
           CARGO_NET_RETRY: "5"
 
-      - name: Fix app bundle
+      - name: Prepare IPA (minimal - no post-processing)
         run: |
           APP_PATH=$(find . -name "*.app" -type d 2>/dev/null | head -1)
           if [ -z "$APP_PATH" ]; then
@@ -61,58 +65,48 @@ jobs:
             exit 1
           fi
           echo "Found app: $APP_PATH"
-          
-          EXEC_NAME=$(find "$APP_PATH" -maxdepth 1 -type f ! -name "*.plist" ! -name "*.json" | head -1 | xargs basename)
-          if [ -n "$EXEC_NAME" ] && [ "$EXEC_NAME" != "DivinesWeb" ]; then
-            echo "Renaming executable from $EXEC_NAME to DivinesWeb"
-            mv "$APP_PATH/$EXEC_NAME" "$APP_PATH/DivinesWeb"
-            chmod +x "$APP_PATH/DivinesWeb"
-          fi
-          
-          if [ -d "$APP_PATH/divines-web" ]; then
-            echo "Removing leftover directory"
-            rm -rf "$APP_PATH/divines-web"
-          fi
-          
-          if [ -d "$APP_PATH/Frameworks" ]; then
-            echo "Removing embedded Frameworks"
-            rm -rf "$APP_PATH/Frameworks"
-          fi
-          
-          if [ -d "$APP_PATH/assets" ]; then
-            echo "Removing assets"
-            rm -rf "$APP_PATH/assets"
-          fi
-          
-          # Rename .app directory to match executable name
-          PARENT_DIR=$(dirname "$APP_PATH")
-          if [ "$(basename "$APP_PATH")" != "DivinesWeb.app" ]; then
-            NEW_APP_PATH="$PARENT_DIR/DivinesWeb.app"
-            mv "$APP_PATH" "$NEW_APP_PATH"
-            APP_PATH="$NEW_APP_PATH"
-            echo "Renamed app bundle to: $APP_PATH"
-          fi
-          
-          printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' '<plist version="1.0">' '<dict>' '    <key>CFBundleDevelopmentRegion</key>' '    <string>zh_CN</string>' '    <key>CFBundleDisplayName</key>' '    <string>Divines</string>' '    <key>CFBundleExecutable</key>' '    <string>DivinesWeb</string>' '    <key>CFBundleIdentifier</key>' '    <string>com.divines.app</string>' '    <key>CFBundleInfoDictionaryVersion</key>' '    <string>6.0</string>' '    <key>CFBundleName</key>' '    <string>DivinesWeb</string>' '    <key>CFBundlePackageType</key>' '    <string>APPL</string>' '    <key>CFBundleShortVersionString</key>' '    <string>0.1.0</string>' '    <key>CFBundleVersion</key>' '    <string>1</string>' '    <key>LSRequiresIPhoneOS</key>' '    <true/>' '    <key>MinimumOSVersion</key>' '    <string>14.0</string>' '    <key>UILaunchScreen</key>' '    <dict/>' '    <key>UIRequiredDeviceCapabilities</key>' '    <array>' '        <string>arm64</string>' '    </array>' '    <key>UISupportedInterfaceOrientations</key>' '    <array>' '        <string>UIInterfaceOrientationPortrait</string>' '        <string>UIInterfaceOrientationLandscapeLeft</string>' '        <string>UIInterfaceOrientationLandscapeRight</string>' '    </array>' '</dict>' '</plist>' > "$APP_PATH/Info.plist"
-          
-          mkdir -p "$APP_PATH/_CodeSignature"
-          
-          printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' '<plist version="1.0">' '<dict>' '    <key>files</key>' '    <dict>' '        <key>Info.plist</key>' '        <data>' '        OECBYXg7w1YcRH0ZVThyAdpGIEk=' '        </data>' '    </dict>' '    <key>files2</key>' '    <dict/>' '    <key>rules</key>' '    <dict>' '        <key>^.*</key>' '        <true/>' '        <key>^.*\.lproj/</key>' '        <dict>' '            <key>optional</key>' '            <true/>' '            <key>weight</key>' '            <real>1000</real>' '        </dict>' '        <key>^.*\.lproj/locversion.plist$</key>' '        <dict>' '            <key>omit</key>' '            <true/>' '            <key>weight</key>' '            <real>1100</real>' '        </dict>' '        <key>^Base\.lproj/</key>' '        <dict>' '            <key>weight</key>' '            <real>1010</real>' '        </dict>' '        <key>^version.plist$</key>' '        <true/>' '    </dict>' '    <key>rules2</key>' '    <dict>' '        <key>.*\.dSYM($|/)</key>' '        <dict>' '            <key>weight</key>' '            <real>11</real>' '        </dict>' '        <key>^(.*/)?\.DS_Store$</key>' '        <dict>' '            <key>omit</key>' '            <true/>' '            <key>weight</key>' '            <real>2000</real>' '        </dict>' '        <key>^.*</key>' '        <true/>' '        <key>^.*\.lproj/</key>' '        <dict>' '            <key>optional</key>' '            <true/>' '            <key>weight</key>' '            <real>1000</real>' '        </dict>' '        <key>^.*\.lproj/locversion.plist$</key>' '        <dict>' '            <key>omit</key>' '            <true/>' '            <key>weight</key>' '            <real>1100</real>' '        </dict>' '        <key>^Base\.lproj/</key>' '        <dict>' '            <key>weight</key>' '            <real>1010</real>' '        </dict>' '        <key>^Info\.plist$</key>' '        <dict>' '            <key>omit</key>' '            <true/>' '            <key>weight</key>' '            <real>20</real>' '        </dict>' '        <key>^PkgInfo$</key>' '        <dict>' '            <key>omit</key>' '            <true/>' '            <key>weight</key>' '            <real>20</real>' '        </dict>' '        <key>^embedded\.provisionprofile$</key>' '        <dict>' '            <key>weight</key>' '            <real>20</real>' '        </dict>' '        <key>^version\.plist$</key>' '        <dict>' '            <key>weight</key>' '            <real>20</real>' '        </dict>' '    </dict>' '</dict>' '</plist>' > "$APP_PATH/_CodeSignature/CodeResources"
-          
+
+          # List original contents
+          echo "=== Original app contents ==="
+          find "$APP_PATH" -type f | while read f; do echo "  $f ($(stat -f%z "$f") bytes)"; done
+
+          # Read original Info.plist
+          echo "=== Original Info.plist ==="
+          cat "$APP_PATH/Info.plist" || echo "No Info.plist found"
+
           # Create entitlements for ad-hoc signing (required for TrollStore)
-          printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' '<plist version="1.0">' '<dict>' '    <key>get-task-allow</key>' '    <true/>' '    <key>com.apple.security.get-task-allow</key>' '    <true/>' '</dict>' '</plist>' > /tmp/entitlements.plist
-          
+          printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' \
+            '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' \
+            '<plist version="1.0">' \
+            '<dict>' \
+            '    <key>get-task-allow</key>' \
+            '    <true/>' \
+            '</dict>' \
+            '</plist>' > /tmp/entitlements.plist
+
+          # Find the executable name from Info.plist
+          EXEC_NAME=$(plutil -extract CFBundleExecutable raw "$APP_PATH/Info.plist" 2>/dev/null || echo "")
+          if [ -z "$EXEC_NAME" ]; then
+            EXEC_NAME=$(find "$APP_PATH" -maxdepth 1 -type f ! -name "*.plist" ! -name "*.json" | head -1 | xargs basename)
+          fi
+          echo "Executable name: $EXEC_NAME"
+
           # Sign the executable first with entitlements
-          codesign --force --sign - --entitlements /tmp/entitlements.plist "$APP_PATH/DivinesWeb"
-          
-          # Then sign the app bundle
+          if [ -n "$EXEC_NAME" ] && [ -f "$APP_PATH/$EXEC_NAME" ]; then
+            echo "Signing executable: $APP_PATH/$EXEC_NAME"
+            codesign --force --sign - --entitlements /tmp/entitlements.plist "$APP_PATH/$EXEC_NAME"
+          fi
+
+          # Sign the app bundle
+          echo "Signing app bundle: $APP_PATH"
           codesign --force --sign - --entitlements /tmp/entitlements.plist "$APP_PATH"
-          
+
+          # Verify
+          echo "=== Codesign verification ==="
           codesign -dv "$APP_PATH" 2>&1 || echo "Codesign verification failed"
-          codesign -dvv "$APP_PATH/DivinesWeb" 2>&1 || echo "Executable codesign verification failed"
-          
-          echo "=== Fixed app ==="
-          ls -la "$APP_PATH"
+
+          echo "=== Final app contents ==="
+          find "$APP_PATH" -type f | while read f; do echo "  $f ($(stat -f%z "$f") bytes)"; done
 
       - name: Package IPA
         run: |

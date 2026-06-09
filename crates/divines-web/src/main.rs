@@ -1,8 +1,7 @@
-﻿// Divines - Dioxus 前端入口
+// Divines - Dioxus 前端入口
 // 参考原项目: astrostudyui/src/app.js, dva.js
 
 use dioxus::prelude::*;
-use dioxus_router::prelude::*;
 
 mod components;
 mod pages;
@@ -10,6 +9,9 @@ mod layouts;
 mod services;
 mod utils;
 mod constants;
+
+use pages::*;
+use layouts::*;
 
 /// 路由定义
 #[derive(Clone, Routable, Debug, PartialEq)]

@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 const API_BASE: &str = "http://127.0.0.1:3000/api";
 
 /// 通用 API 请求
+#[cfg(feature = "reqwest")]
 pub async fn api_request<T: for<'de> Deserialize<'de>>(
     method: &str,
     path: &str,
@@ -36,6 +37,16 @@ pub async fn api_request<T: for<'de> Deserialize<'de>>(
         .json::<T>()
         .await
         .map_err(|e| format!("解析错误: {}", e))
+}
+
+/// 通用 API 请求 (stub for mobile - no reqwest)
+#[cfg(not(feature = "reqwest"))]
+pub async fn api_request<T: for<'de> Deserialize<'de>>(
+    _method: &str,
+    _path: &str,
+    _body: Option<&impl Serialize>,
+) -> Result<T, String> {
+    Err("网络功能在移动端暂不可用".to_string())
 }
 
 /// 占星服务
