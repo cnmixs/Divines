@@ -1,4 +1,4 @@
-﻿// Divines - 服务模块
+// Divines - 服务模块
 // 参考原项目: astrostudyui/src/services/
 
 use serde::{Deserialize, Serialize};
