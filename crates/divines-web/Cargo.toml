@@ -18,7 +18,7 @@ dioxus-signals.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 chrono.workspace = true
-reqwest.workspace = true
+reqwest = { workspace = true, optional = true }
 tracing.workspace = true
 wasm-bindgen = { version = "0.2", optional = true }
 web-sys = { version = "0.3", features = ["console"], optional = true }
@@ -27,6 +27,6 @@ rand = "0.8"
 
 [features]
 default = ["web"]
-web = ["dioxus/web", "dioxus-web", "wasm-bindgen", "web-sys", "js-sys"]
-desktop = ["dioxus/desktop", "dioxus-desktop"]
+web = ["dioxus/web", "dioxus-web", "wasm-bindgen", "web-sys", "js-sys", "reqwest"]
+desktop = ["dioxus/desktop", "dioxus-desktop", "reqwest"]
 mobile = ["dioxus/mobile", "dioxus-desktop"]
