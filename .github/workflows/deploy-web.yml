@@ -68,7 +68,7 @@ jobs:
           <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Divines - 私域工作站</title>
+            <title>Divines - 绉佸煙宸ヤ綔绔?/title>
             <style>
               * { margin: 0; padding: 0; box-sizing: border-box; }
               html, body { width: 100%; height: 100%; overflow: hidden; background: #0d1117; }
@@ -86,9 +86,10 @@ jobs:
             </style>
           </head>
           <body>
+            <div id="main"></div>
             <div id="loading">
               <div class="spinner"></div>
-              <div>Divines 加载中...</div>
+              <div>Divines 鍔犺浇涓?..</div>
               <div id="error" class="error"></div>
             </div>
             <script type="module">
@@ -99,7 +100,7 @@ jobs:
               } catch (e) {
                 const err = document.getElementById('error');
                 err.style.display = 'block';
-                err.textContent = '加载失败: ' + e.message;
+                err.textContent = '鍔犺浇澶辫触: ' + e.message;
               }
             </script>
           </body>
