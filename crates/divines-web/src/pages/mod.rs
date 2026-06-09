@@ -1,5 +1,5 @@
-// Divines - 页面模块
-// 参考原项目: astrostudyui/src/pages/
+// Divines - 椤甸潰妯″潡
+// 鍙傝€冨師椤圭洰: astrostudyui/src/pages/
 
 pub mod home;
 pub use home::*;
@@ -10,15 +10,91 @@ use crate::Route;
 use crate::services;
 use chrono::Datelike;
 
-// ============ 辅助函数 ============
+// ============ 杈呭姪鍑芥暟 ============
 
-fn fmt_deg(v: f64) -> String { format!("{:.2}度", v) }
-fn fmt_age(start: u64, end: u64) -> String { format!("{}-{}岁", start, end) }
+fn fmt_deg(v: f64) -> String { format!("{:.2}掳", v) }
+fn fmt_age(start: u64, end: u64) -> String { format!("{}-{}宀?, start, end) }
 fn fmt_year(start: i64, end: i64) -> String { format!("{}-{}", start, end) }
 fn fmt_mag(v: f64) -> String { format!("{:.3}", v) }
-fn fmt_hour(v: f64) -> String { format!("{:.2}时", v) }
+fn fmt_hour(v: f64) -> String { format!("{:.2}鏃?, v) }
 
-// ============ 占星本命盘============
+/// 閫氱敤 JSON 娓叉煋鍑芥暟: 灏?JSON Value 娓叉煋涓虹粨鏋勫寲 HTML 缁勪欢
+fn json_render(data: &serde_json::Value) -> Element {
+    match data {
+        serde_json::Value::Object(obj) => {
+            let keys: Vec<&String> = obj.keys().collect();
+            rsx! {
+                table { class: "data-table",
+                    tbody {
+                        for key in keys {
+                            if let Some(val) = obj.get(key) {
+                                tr {
+                                    td {
+                                        strong { style: "color: var(--divines-muted); font-size: 12px;",
+                                            "{key}"
+                                        }
+                                    }
+                                    td { {json_render(val)} }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        serde_json::Value::Array(arr) => {
+            if arr.is_empty() {
+                rsx! { span { class: "empty-state", "(鏃犳暟鎹?" } }
+            } else if arr.first().and_then(|v| v.as_object()).is_some() {
+                let first_keys: Vec<String> = arr.first().unwrap().as_object().unwrap().keys().cloned().collect();
+                rsx! {
+                    table { class: "data-table",
+                        thead {
+                            tr {
+                                for key in &first_keys {
+                                    th { "{key}" }
+                                }
+                            }
+                        }
+                        tbody {
+                            for item in arr {
+                                tr {
+                                    for key in &first_keys {
+                                        td { {json_render(&item.get(key).cloned().unwrap_or(serde_json::Value::Null))} }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                rsx! {
+                    ul {
+                        for item in arr {
+                            li { {json_render(item)} }
+                        }
+                    }
+                }
+            }
+        }
+        serde_json::Value::String(s) => {
+            rsx! { span { "{s}" } }
+        }
+        serde_json::Value::Number(n) => {
+            if let Some(i) = n.as_i64() {
+                rsx! { span { "{i}" } }
+            } else {
+                rsx! { span { "{n}" } }
+            }
+        }
+        serde_json::Value::Bool(b) => {
+            rsx! { span { if *b { "鏄? } else { "鍚? } } }
+        }
+        _ => rsx! { span { "-" } },
+    }
+}
+
+// ============ 鍗犳槦鏈懡鐩?===========
 
 #[component]
 pub fn AstroNatal() -> Element {
@@ -62,13 +138,13 @@ pub fn AstroNatal() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "占星本命盘 " }
-            p { class: "page-desc ", "输入出生信息,计算西洋占星本命盘 " }
+            h2 { "鍗犳槦鏈懡鐩?" }
+            p { class: "page-desc ", "杈撳叆鍑虹敓淇℃伅,璁＄畻瑗挎磱鍗犳槦鏈懡鐩?" }
 
             div { class: "form-card ",
                 div { class: "form-row ",
                     div { class: "form-group ",
-                        label { "出生日期时间 " }
+                        label { "鍑虹敓鏃ユ湡鏃堕棿 " }
                         input {
                             r#type: "datetime-local ",
                             value: "{datetime}",
@@ -76,10 +152,10 @@ pub fn AstroNatal() -> Element {
                         }
                     }
                     div { class: "form-group ",
-                        label { "姓名 " }
+                        label { "濮撳悕 " }
                         input {
                             r#type: "text ",
-                            placeholder: "可选",
+                            placeholder: "鍙€?,
                             value: "{name}",
                             oninput: move |evt| name.set(evt.value()),
                         }
@@ -87,7 +163,7 @@ pub fn AstroNatal() -> Element {
                 }
                 div { class: "form-row ",
                     div { class: "form-group ",
-                        label { "纬度 " }
+                        label { "绾害 " }
                         input {
                             r#type: "number ",
                             step: "0.0001 ",
@@ -100,7 +176,7 @@ pub fn AstroNatal() -> Element {
                         }
                     }
                     div { class: "form-group ",
-                        label { "经度 " }
+                        label { "缁忓害 " }
                         input {
                             r#type: "number ",
                             step: "0.0001 ",
@@ -113,7 +189,7 @@ pub fn AstroNatal() -> Element {
                         }
                     }
                     div { class: "form-group ",
-                        label { "时区 " }
+                        label { "鏃跺尯 " }
                         input {
                             r#type: "number ",
                             step: "0.5 ",
@@ -128,21 +204,21 @@ pub fn AstroNatal() -> Element {
                 }
                 div { class: "form-row ",
                     div { class: "form-group ",
-                        label { "地点 " }
+                        label { "鍦扮偣 " }
                         input {
                             r#type: "text ",
-                            placeholder: "如:北京 ",
+                            placeholder: "濡?鍖椾含 ",
                             value: "{place_name}",
                             oninput: move |evt| place_name.set(evt.value()),
                         }
                     }
                     div { class: "form-group ",
-                        label { "性别 " }
+                        label { "鎬у埆 " }
                         select {
                             value: "{gender}",
                             onchange: move |evt| gender.set(evt.value()),
-                            option { value: "male", "男 " }
-                            option { value: "female", "女 " }
+                            option { value: "male", "鐢?" }
+                            option { value: "female", "濂?" }
                         }
                     }
                 }
@@ -150,12 +226,12 @@ pub fn AstroNatal() -> Element {
                     class: "submit-btn ",
                     onclick: on_submit,
                     disabled: loading(),
-                    "计算本命盘 "
+                    "璁＄畻鏈懡鐩?"
                 }
             }
 
             if loading() {
-                div { class: "loading ", "计算中... " }
+                div { class: "loading ", "璁＄畻涓?.. " }
             }
 
             if let Some(ref err) = *error.read() {
@@ -164,18 +240,18 @@ pub fn AstroNatal() -> Element {
 
             if let Some(ref data) = *result.read() {
                 div { class: "result-card ",
-                    h3 { "星盘结果 " }
+                    h3 { "鏄熺洏缁撴灉 " }
                     if let Some(planets) = data.get("planets").and_then(|v| v.as_array()) {
                         div { class: "planet-list ",
-                            h4 { "行星位置 " }
+                            h4 { "琛屾槦浣嶇疆 " }
                             table { class: "data-table ",
                                 thead {
                                     tr {
-                                        th { "行星 " }
-                                        th { "星座 " }
-                                        th { "度数 " }
-                                        th { "宫位 " }
-                                        th { "逆行 " }
+                                        th { "琛屾槦 " }
+                                        th { "鏄熷骇 " }
+                                        th { "搴︽暟 " }
+                                        th { "瀹綅 " }
+                                        th { "閫嗚 " }
                                     }
                                 }
                                 tbody {
@@ -194,15 +270,15 @@ pub fn AstroNatal() -> Element {
                     }
                     if let Some(aspects) = data.get("aspects").and_then(|v| v.as_array()) {
                         div { class: "aspect-list ",
-                            h4 { "相位 ({aspects.len()})" }
+                            h4 { "鐩镐綅 ({aspects.len()})" }
                             table { class: "data-table ",
                                 thead {
                                     tr {
-                                        th { "行星1 " }
-                                        th { "行星2 " }
-                                        th { "相位 " }
-                                        th { "角度 " }
-                                        th { "容许度 " }
+                                        th { "琛屾槦1 " }
+                                        th { "琛屾槦2 " }
+                                        th { "鐩镐綅 " }
+                                        th { "瑙掑害 " }
+                                        th { "瀹硅搴?" }
                                     }
                                 }
                                 tbody {
@@ -225,7 +301,7 @@ pub fn AstroNatal() -> Element {
     }
 }
 
-// ============ 星运推运 ============
+// ============ 鏄熻繍鎺ㄨ繍 ============
 
 #[component]
 pub fn AstroTiming() -> Element {
@@ -238,18 +314,18 @@ pub fn AstroTiming() -> Element {
     let mut loading = use_signal(|| false);
 
     let tabs = [
-        ("solar_arc", "太阳弧 "),
-        ("progressions", "次限法 "),
-        ("primary_dir", "主限法 "),
-        ("profections", "小限 "),
-        ("firdaria", "法达星限 "),
-        ("age_point", "年龄推进点 "),
-        ("symbolic_dir", "波期向运 "),
-        ("term_dir", "界限法 "),
-        ("thirteenth", "第十三月盘 "),
-        ("harmonic", "调波盘 "),
-        ("draconic", "龙盘 "),
-        ("year_129", "129年系统 "),
+        ("solar_arc", "澶槼寮?"),
+        ("progressions", "娆￠檺娉?"),
+        ("primary_dir", "涓婚檺娉?"),
+        ("profections", "灏忛檺 "),
+        ("firdaria", "娉曡揪鏄熼檺 "),
+        ("age_point", "骞撮緞鎺ㄨ繘鐐?"),
+        ("symbolic_dir", "娉㈡湡鍚戣繍 "),
+        ("term_dir", "鐣岄檺娉?"),
+        ("thirteenth", "绗崄涓夋湀鐩?"),
+        ("harmonic", "璋冩尝鐩?"),
+        ("draconic", "榫欑洏 "),
+        ("year_129", "129骞寸郴缁?"),
     ];
 
     let on_calc = move |_| {
@@ -284,23 +360,23 @@ pub fn AstroTiming() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "星运 - 推运 " }
-            p { class: "page-desc ", "太阳弧, 次限法, 主限法, 法达星限, 小限等推运系统 " }
+            h2 { "鏄熻繍 - 鎺ㄨ繍 " }
+            p { class: "page-desc ", "澶槼寮? 娆￠檺娉? 涓婚檺娉? 娉曡揪鏄熼檺, 灏忛檺绛夋帹杩愮郴缁?" }
             div { class: "form-card ",
                 div { class: "form-row ",
                     div { class: "form-group ",
-                        label { "出生日期时间 " }
+                        label { "鍑虹敓鏃ユ湡鏃堕棿 " }
                         input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) }
                     }
                 }
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "纬度 " }
+                    div { class: "form-group ", label { "绾害 " }
                         input { r#type: "number ", step: "0.0001 ", value: "{latitude}",
                             oninput: move |evt| { if let Ok(v) = evt.value().parse::<f64>() { latitude.set(v); } } } }
-                    div { class: "form-group ", label { "经度 " }
+                    div { class: "form-group ", label { "缁忓害 " }
                         input { r#type: "number ", step: "0.0001 ", value: "{longitude}",
                             oninput: move |evt| { if let Ok(v) = evt.value().parse::<f64>() { longitude.set(v); } } } }
-                    div { class: "form-group ", label { "时区 " }
+                    div { class: "form-group ", label { "鏃跺尯 " }
                         input { r#type: "number ", step: "0.5 ", value: "{timezone}",
                             oninput: move |evt| { if let Ok(v) = evt.value().parse::<f64>() { timezone.set(v); } } } }
                 }
@@ -313,11 +389,11 @@ pub fn AstroTiming() -> Element {
                         }
                     }
                 }
-                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "计算 " }
+                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "璁＄畻 " }
             }
-            if loading() { div { class: "loading ", "计算中... " } }
+            if loading() { div { class: "loading ", "璁＄畻涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "推运结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "鎺ㄨ繍缁撴灉 " } {json_render(data)} }
             }
         }
     }
@@ -332,9 +408,9 @@ pub fn AstroRelationship() -> Element {
     let mut loading = use_signal(|| false);
 
     let tabs = [
-        ("synastry", "比较盘 "),
-        ("composite", "组合盘 "),
-        ("time_space", "时空中点盘 "),
+        ("synastry", "姣旇緝鐩?"),
+        ("composite", "缁勫悎鐩?"),
+        ("time_space", "鏃剁┖涓偣鐩?"),
     ];
 
     let on_calc = move |_| {
@@ -355,15 +431,15 @@ pub fn AstroRelationship() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "合盘 - 关系盘 " }
-            p { class: "page-desc ", "比较盘, 组合盘, 时空中点盘分析 " }
+            h2 { "鍚堢洏 - 鍏崇郴鐩?" }
+            p { class: "page-desc ", "姣旇緝鐩? 缁勫悎鐩? 鏃剁┖涓偣鐩樺垎鏋?" }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "内盘出生时间 " }
+                    div { class: "form-group ", label { "鍐呯洏鍑虹敓鏃堕棿 " }
                         input { r#type: "datetime-local ", value: "{inner_datetime}", oninput: move |evt| inner_datetime.set(evt.value()) } }
                 }
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "外盘出生时间 " }
+                    div { class: "form-group ", label { "澶栫洏鍑虹敓鏃堕棿 " }
                         input { r#type: "datetime-local ", value: "{outer_datetime}", oninput: move |evt| outer_datetime.set(evt.value()) } }
                 }
                 div { class: "tab-buttons ",
@@ -372,11 +448,11 @@ pub fn AstroRelationship() -> Element {
                             onclick: move |_| active_tab.set(key.to_string()), "{label}" }
                     }
                 }
-                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "计算合盘 " }
+                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "璁＄畻鍚堢洏 " }
             }
-            if loading() { div { class: "loading ", "计算中... " } }
+            if loading() { div { class: "loading ", "璁＄畻涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "合盘结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "鍚堢洏缁撴灉 " } {json_render(data)} }
             }
         }
     }
@@ -393,13 +469,13 @@ pub fn AstroSpecialty() -> Element {
     let mut loading = use_signal(|| false);
 
     let tabs = [
-        ("arabic", "阿拉伯点 "),
-        ("aspects", "相位详情 "),
-        ("decennials", "十年运 "),
-        ("dispositor", "最终定位星 "),
-        ("lots", "特殊点 "),
-        ("zr", "黄道星释 "),
-        ("return", "回归盘 "),
+        ("arabic", "闃挎媺浼偣 "),
+        ("aspects", "鐩镐綅璇︽儏 "),
+        ("decennials", "鍗佸勾杩?"),
+        ("dispositor", "鏈€缁堝畾浣嶆槦 "),
+        ("lots", "鐗规畩鐐?"),
+        ("zr", "榛勯亾鏄熼噴 "),
+        ("return", "鍥炲綊鐩?"),
     ];
 
     let on_calc = move |_| {
@@ -424,11 +500,11 @@ pub fn AstroSpecialty() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "辅盘 - 专项分析 " }
-            p { class: "page-desc ", "阿拉伯点, 相位, 星释, 回归盘等专项分析 " }
+            h2 { "杈呯洏 - 涓撻」鍒嗘瀽 " }
+            p { class: "page-desc ", "闃挎媺浼偣, 鐩镐綅, 鏄熼噴, 鍥炲綊鐩樼瓑涓撻」鍒嗘瀽 " }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "出生日期时间 " }
+                    div { class: "form-group ", label { "鍑虹敓鏃ユ湡鏃堕棿 " }
                         input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) } }
                 }
                 div { class: "tab-buttons ",
@@ -437,11 +513,11 @@ pub fn AstroSpecialty() -> Element {
                             onclick: move |_| active_tab.set(key.to_string()), "{label}" }
                     }
                 }
-                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "计算 " }
+                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "璁＄畻 " }
             }
-            if loading() { div { class: "loading ", "计算中... " } }
+            if loading() { div { class: "loading ", "璁＄畻涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "分析结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "鍒嗘瀽缁撴灉 " } {json_render(data)} }
             }
         }
     }
@@ -458,10 +534,10 @@ pub fn AstroVedic() -> Element {
     let mut loading = use_signal(|| false);
 
     let tabs = [
-        ("chart", "印度盘 "),
-        ("dasha", "大运 "),
-        ("yogas", "格局 "),
-        ("nakshatra", "27宿 "),
+        ("chart", "鍗板害鐩?"),
+        ("dasha", "澶ц繍 "),
+        ("yogas", "鏍煎眬 "),
+        ("nakshatra", "27瀹?"),
     ];
 
     let on_calc = move |_| {
@@ -488,11 +564,11 @@ pub fn AstroVedic() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "印度占星 - Vedic " }
-            p { class: "page-desc ", "包含东印度盘, 恒星黄道, 大运系统, 27宿 " }
+            h2 { "鍗板害鍗犳槦 - Vedic " }
+            p { class: "page-desc ", "鍖呭惈涓滃嵃搴︾洏, 鎭掓槦榛勯亾, 澶ц繍绯荤粺, 27瀹?" }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "出生日期时间 " }
+                    div { class: "form-group ", label { "鍑虹敓鏃ユ湡鏃堕棿 " }
                         input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) } }
                 }
                 div { class: "tab-buttons ",
@@ -501,11 +577,11 @@ pub fn AstroVedic() -> Element {
                             onclick: move |_| active_tab.set(key.to_string()), "{label}" }
                     }
                 }
-                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "计算 " }
+                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "璁＄畻 " }
             }
-            if loading() { div { class: "loading ", "计算中... " } }
+            if loading() { div { class: "loading ", "璁＄畻涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "印度占星结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "鍗板害鍗犳槦缁撴灉 " } {json_render(data)} }
             }
         }
     }
@@ -541,44 +617,44 @@ pub fn AstroQizheng() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "七政四余 - 果老星宗 " }
-            p { class: "page-desc ", "输入出生信息,排七政四余星盘,含28宿, 命度身度, 洞微大限, 果老格局 " }
+            h2 { "涓冩斂鍥涗綑 - 鏋滆€佹槦瀹?" }
+            p { class: "page-desc ", "杈撳叆鍑虹敓淇℃伅,鎺掍竷鏀垮洓浣欐槦鐩?鍚?8瀹? 鍛藉害韬害, 娲炲井澶ч檺, 鏋滆€佹牸灞€ " }
             div { class: "form-card ",
                 div { class: "form-row ",
                     div { class: "form-group ",
-                        label { "出生日期时间 " }
+                        label { "鍑虹敓鏃ユ湡鏃堕棿 " }
                         input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) }
                     }
                 }
                 div { class: "form-row ",
                     div { class: "form-group ",
-                        label { "纬度 " }
+                        label { "绾害 " }
                         input { r#type: "number ", step: "0.0001 ", value: "{latitude}",
                             oninput: move |evt| { if let Ok(v) = evt.value().parse::<f64>() { latitude.set(v); } } }
                     }
                     div { class: "form-group ",
-                        label { "经度 " }
+                        label { "缁忓害 " }
                         input { r#type: "number ", step: "0.0001 ", value: "{longitude}",
                             oninput: move |evt| { if let Ok(v) = evt.value().parse::<f64>() { longitude.set(v); } } }
                     }
                     div { class: "form-group ",
-                        label { "时区 " }
+                        label { "鏃跺尯 " }
                         input { r#type: "number ", step: "0.5 ", value: "{timezone}",
                             oninput: move |evt| { if let Ok(v) = evt.value().parse::<f64>() { timezone.set(v); } } }
                     }
                 }
-                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "排盘 " }
+                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "鎺掔洏 " }
             }
-            if loading() { div { class: "loading ", "排盘中... " } }
+            if loading() { div { class: "loading ", "鎺掔洏涓?.. " } }
             if let Some(ref err) = *error.read() { div { class: "error-message ", "{err}" } }
             if let Some(ref data) = *result.read() {
                 div { class: "result-card ",
-                    h3 { "七政四余星盘 " }
+                    h3 { "涓冩斂鍥涗綑鏄熺洏 " }
                     if let Some(planets) = data.get("planets").and_then(|v| v.as_array()) {
                         div { class: "section ",
-                            h4 { "行星位置 " }
+                            h4 { "琛屾槦浣嶇疆 " }
                             table { class: "data-table ",
-                                thead { tr { th { "行星 " } th { "黄经 " } th { "星宿 " } th { "宫位 " } th { "28宿 " } th { "逆行 " } } }
+                                thead { tr { th { "琛屾槦 " } th { "榛勭粡 " } th { "鏄熷 " } th { "瀹綅 " } th { "28瀹?" } th { "閫嗚 " } } }
                                 tbody {
                                     for p in planets {
                                         tr {
@@ -596,9 +672,9 @@ pub fn AstroQizheng() -> Element {
                     }
                     if let Some(houses) = data.get("houses").and_then(|v| v.as_array()) {
                         div { class: "section ",
-                            h4 { "十二宫 " }
+                            h4 { "鍗佷簩瀹?" }
                             table { class: "data-table ",
-                                thead { tr { th { "宫位 " } th { "宫名 " } th { "星座 " } th { "度数 " } } }
+                                thead { tr { th { "瀹綅 " } th { "瀹悕 " } th { "鏄熷骇 " } th { "搴︽暟 " } } }
                                 tbody {
                                     for h in houses {
                                         tr {
@@ -615,7 +691,7 @@ pub fn AstroQizheng() -> Element {
                     if let Some(patterns) = data.get("patterns").and_then(|v| v.as_array()) {
                         if !patterns.is_empty() {
                             div { class: "section ",
-                                h4 { "格局 " }
+                                h4 { "鏍煎眬 " }
                                 ul { for p in patterns { li { {p.as_str().unwrap_or("? ")} } } }
                             }
                         }
@@ -623,13 +699,13 @@ pub fn AstroQizheng() -> Element {
                     if let Some(dongwei) = data.get("dong_wei").and_then(|v| v.as_array()) {
                         if !dongwei.is_empty() {
                             div { class: "section ",
-                                h4 { "洞微大限 " }
+                                h4 { "娲炲井澶ч檺 " }
                                 table { class: "data-table ",
-                                    thead { tr { th { "年限 " } th { "宫位 " } th { "说明 " } } }
+                                    thead { tr { th { "骞撮檺 " } th { "瀹綅 " } th { "璇存槑 " } } }
                                     tbody {
                                         for dw in dongwei {
                                             tr {
-                                                td { {format!("{}-{}岁 ", dw.get("start_age").and_then(|v| v.as_u64()).unwrap_or(0).to_string(), dw.get("end_age").and_then(|v| v.as_u64()).unwrap_or(0).to_string())} }
+                                                td { {format!("{}-{}宀?", dw.get("start_age").and_then(|v| v.as_u64()).unwrap_or(0).to_string(), dw.get("end_age").and_then(|v| v.as_u64()).unwrap_or(0).to_string())} }
                                                 td { {dw.get("house_name").and_then(|v| v.as_str()).unwrap_or("? ")} }
                                                 td { {dw.get("description").and_then(|v| v.as_str()).unwrap_or("? ")} }
                                             }
@@ -645,7 +721,7 @@ pub fn AstroQizheng() -> Element {
     }
 }
 
-// ============ 八字排盘 ============
+// ============ 鍏瓧鎺掔洏 ============
 
 #[component]
 pub fn Bazi() -> Element {
@@ -689,13 +765,13 @@ pub fn Bazi() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "八字排盘 " }
-            p { class: "page-desc ", "输入出生日期时间,排四柱八字, 十神, 大运,支持真太阳时, 早晚子时, 平气/定气 " }
+            h2 { "鍏瓧鎺掔洏 " }
+            p { class: "page-desc ", "杈撳叆鍑虹敓鏃ユ湡鏃堕棿,鎺掑洓鏌卞叓瀛? 鍗佺, 澶ц繍,鏀寔鐪熷お闃虫椂, 鏃╂櫄瀛愭椂, 骞虫皵/瀹氭皵 " }
 
             div { class: "form-card ",
                 div { class: "form-row ",
                     div { class: "form-group ",
-                        label { "出生日期时间 " }
+                        label { "鍑虹敓鏃ユ湡鏃堕棿 " }
                         input {
                             r#type: "datetime-local ",
                             value: "{datetime}",
@@ -703,28 +779,28 @@ pub fn Bazi() -> Element {
                         }
                     }
                     div { class: "form-group ",
-                        label { "姓名(可选) " }
+                        label { "濮撳悕(鍙€? " }
                         input {
                             r#type: "text ",
-                            placeholder: "可选",
+                            placeholder: "鍙€?,
                             value: "{name}",
                             oninput: move |evt| name.set(evt.value()),
                         }
                     }
                     div { class: "form-group ",
-                        label { "性别 " }
+                        label { "鎬у埆 " }
                         select {
                             value: "{gender}",
                             onchange: move |evt| gender.set(evt.value()),
-                            option { value: "male", "男 " }
-                            option { value: "female", "女 " }
+                            option { value: "male", "鐢?" }
+                            option { value: "female", "濂?" }
                         }
                     }
                 }
 
-                // 排盘选项
+                // 鎺掔洏閫夐」
                 div { class: "options-section ",
-                    h4 { "排盘选项 " }
+                    h4 { "鎺掔洏閫夐」 " }
                     div { class: "options-grid ",
                         div { class: "option-item ",
                             label { class: "option-label ",
@@ -733,7 +809,7 @@ pub fn Bazi() -> Element {
                                     checked: use_true_solar(),
                                     onchange: move |evt| use_true_solar.set(evt.value() == "true "),
                                 }
-                                span { "真太阳时 " }
+                                span { "鐪熷お闃虫椂 " }
                             }
                         }
                         div { class: "option-item ",
@@ -743,7 +819,7 @@ pub fn Bazi() -> Element {
                                     checked: use_early_late_zi(),
                                     onchange: move |evt| use_early_late_zi.set(evt.value() == "true "),
                                 }
-                                span { "区分早晚子时 " }
+                                span { "鍖哄垎鏃╂櫄瀛愭椂 " }
                             }
                         }
                         div { class: "option-item ",
@@ -753,12 +829,12 @@ pub fn Bazi() -> Element {
                                     checked: use_ding_qi(),
                                     onchange: move |evt| use_ding_qi.set(evt.value() == "true "),
                                 }
-                                span { "定气法 " }
+                                span { "瀹氭皵娉?" }
                             }
-                            span { class: "option-hint ", "(取消选择为平气法) " }
+                            span { class: "option-hint ", "(鍙栨秷閫夋嫨涓哄钩姘旀硶) " }
                         }
                         div { class: "form-group form-group-inline ",
-                            label { "经度: " }
+                            label { "缁忓害: " }
                             input {
                                 r#type: "number ",
                                 step: "0.0001 ",
@@ -778,12 +854,12 @@ pub fn Bazi() -> Element {
                     class: "submit-btn ",
                     onclick: on_submit,
                     disabled: loading(),
-                    "排盘 "
+                    "鎺掔洏 "
                 }
             }
 
             if loading() {
-                div { class: "loading ", "排盘中... " }
+                div { class: "loading ", "鎺掔洏涓?.. " }
             }
 
             if let Some(ref err) = *error.read() {
@@ -792,20 +868,20 @@ pub fn Bazi() -> Element {
 
             if let Some(ref data) = *result.read() {
                 div { class: "result-card ",
-                    h3 { "八字排盘结果 " }
+                    h3 { "鍏瓧鎺掔洏缁撴灉 " }
 
-                    // 四柱
+                    // 鍥涙煴
                     div { class: "bazi-pillars ",
-                        h4 { "四柱 " }
+                        h4 { "鍥涙煴 " }
                         div { class: "pillar-grid ",
                             for pillar_key in ["year ", "month ", "day ", "hour"] {
                                 div { class: "pillar-item ",
                                     div { class: "pillar-label ",
                                         {match pillar_key {
-                                            "year" => "年柱 ",
-                                            "month" => "月柱 ",
-                                            "day" => "日柱 ",
-                                            "hour" => "时柱 ",
+                                            "year" => "骞存煴 ",
+                                            "month" => "鏈堟煴 ",
+                                            "day" => "鏃ユ煴 ",
+                                            "hour" => "鏃舵煴 ",
                                             _ => "",
                                         }}
                                     }
@@ -822,26 +898,26 @@ pub fn Bazi() -> Element {
                         }
                     }
 
-                    // 日主
+                    // 鏃ヤ富
                     if let Some(dm) = data.get("day_master").and_then(|v| v.as_str()) {
                         div { class: "day-master ",
-                            span { "日主: " }
+                            span { "鏃ヤ富: " }
                             strong { "{dm}" }
                         }
                     }
                     if let Some(adj_hour) = data.get("adjusted_hour").and_then(|v| v.as_f64()) {
                         div { class: "adjusted-hour ",
-                            span { "校正时 " }
-                            span { "{adj_hour:.2}时 " }
+                            span { "鏍℃鏃?" }
+                            span { "{adj_hour:.2}鏃?" }
                         }
                     }
 
-                    // 十神 
+                    // 鍗佺 
                     if let Some(ten_gods) = data.get("ten_gods") {
                         div { class: "ten-gods ",
-                            h4 { "十神 " }
+                            h4 { "鍗佺 " }
                             div { class: "ten-god-grid ",
-                                for (key, label) in [("year", "年 "), ("month", "月 "), ("day", "日 "), ("hour", "时 ")] {
+                                for (key, label) in [("year", "骞?"), ("month", "鏈?"), ("day", "鏃?"), ("hour", "鏃?")] {
                                     div { class: "ten-god-item ",
                                         span { "{label}: " }
                                         span { class: "ten-god-value ",
@@ -853,12 +929,12 @@ pub fn Bazi() -> Element {
                         }
                     }
 
-                    // 长生十二神
+                    // 闀跨敓鍗佷簩绁?
                     if let Some(chang_sheng) = data.get("chang_sheng") {
                         div { class: "chang-sheng ",
-                            h4 { "长生十二神 " }
+                            h4 { "闀跨敓鍗佷簩绁?" }
                             div { class: "chang-sheng-grid ",
-                                for (key, label) in [("year", "年 "), ("month", "月 "), ("day", "日 "), ("hour", "时 ")] {
+                                for (key, label) in [("year", "骞?"), ("month", "鏈?"), ("day", "鏃?"), ("hour", "鏃?")] {
                                     div { class: "chang-sheng-item ",
                                         span { "{label}: " }
                                         span { class: "chang-sheng-value ",
@@ -870,12 +946,12 @@ pub fn Bazi() -> Element {
                         }
                     }
 
-                    // 纳音
+                    // 绾抽煶
                     if let Some(na_yin) = data.get("na_yin") {
                         div { class: "na-yin ",
-                            h4 { "纳音 " }
+                            h4 { "绾抽煶 " }
                             div { class: "na-yin-grid ",
-                                for (key, label) in [("year", "年 "), ("month", "月 "), ("day", "日 "), ("hour", "时 ")] {
+                                for (key, label) in [("year", "骞?"), ("month", "鏈?"), ("day", "鏃?"), ("hour", "鏃?")] {
                                     div { class: "na-yin-item ",
                                         span { "{label}: " }
                                         span { {na_yin.get(key).and_then(|v| v.as_str()).unwrap_or("? ")} }
@@ -885,12 +961,12 @@ pub fn Bazi() -> Element {
                         }
                     }
 
-                    // 藏干
+                    // 钘忓共
                     if let Some(hidden) = data.get("hidden_stems") {
                         div { class: "hidden-stems ",
-                            h4 { "藏干 " }
+                            h4 { "钘忓共 " }
                             div { class: "ten-god-grid ",
-                                for (key, label) in [("year", "年 "), ("month", "月 "), ("day", "日 "), ("hour", "时 ")] {
+                                for (key, label) in [("year", "骞?"), ("month", "鏈?"), ("day", "鏃?"), ("hour", "鏃?")] {
                                     div { class: "ten-god-item ",
                                         span { "{label}: " }
                                         if let Some(arr) = hidden.get(key).and_then(|v| v.as_array()) {
@@ -904,17 +980,17 @@ pub fn Bazi() -> Element {
                         }
                     }
 
-                    // 干支刑冲合度 
+                    // 骞叉敮鍒戝啿鍚堝害 
                     if let Some(relations) = data.get("relations").and_then(|v| v.as_array()) {
                         if !relations.is_empty() {
                             div { class: "relations ",
-                                h4 { "干支刑冲合度 " }
+                                h4 { "骞叉敮鍒戝啿鍚堝害 " }
                                 table { class: "data-table ",
                                     thead {
                                         tr {
-                                            th { "类型 " }
-                                            th { "涉及柱 " }
-                                            th { "详情 " }
+                                            th { "绫诲瀷 " }
+                                            th { "娑夊強鏌?" }
+                                            th { "璇︽儏 " }
                                         }
                                     }
                                     tbody {
@@ -935,17 +1011,17 @@ pub fn Bazi() -> Element {
                         }
                     }
 
-                    // 神煞
+                    // 绁炵厼
                     if let Some(shen_sha) = data.get("shen_sha").and_then(|v| v.as_array()) {
                         if !shen_sha.is_empty() {
                             div { class: "shen-sha ",
-                                h4 { "神煞 " }
+                                h4 { "绁炵厼 " }
                                 table { class: "data-table ",
                                     thead {
                                         tr {
-                                            th { "神煞 " }
-                                            th { "位置 " }
-                                            th { "说明 " }
+                                            th { "绁炵厼 " }
+                                            th { "浣嶇疆 " }
+                                            th { "璇存槑 " }
                                         }
                                     }
                                     tbody {
@@ -962,10 +1038,10 @@ pub fn Bazi() -> Element {
                         }
                     }
 
-                    // 大运
+                    // 澶ц繍
                     if let Some(qi_yun) = data.get("qi_yun_time").and_then(|v| v.as_str()) {
                         div { class: "qi-yun ",
-                            h4 { "起运时间 " }
+                            h4 { "璧疯繍鏃堕棿 " }
                             p { "{qi_yun}" }
                         }
                     }
@@ -973,21 +1049,21 @@ pub fn Bazi() -> Element {
                     if let Some(da_yun) = data.get("da_yun").and_then(|v| v.as_array()) {
                         if !da_yun.is_empty() {
                             div { class: "da-yun ",
-                                h4 { "大运 " }
+                                h4 { "澶ц繍 " }
                                 table { class: "data-table ",
                                     thead {
                                         tr {
-                                            th { "年龄 " }
-                                            th { "天干 " }
-                                            th { "地支 " }
-                                            th { "十神 " }
-                                            th { "年份 " }
+                                            th { "骞撮緞 " }
+                                            th { "澶╁共 " }
+                                            th { "鍦版敮 " }
+                                            th { "鍗佺 " }
+                                            th { "骞翠唤 " }
                                         }
                                     }
                                     tbody {
                                         for dy in da_yun {
                                             tr {
-                                                td { {format!("{}-{}岁 ", dy.get("start_age").and_then(|v| v.as_u64()).unwrap_or(0).to_string(), dy.get("end_age").and_then(|v| v.as_u64()).unwrap_or(0).to_string())} }
+                                                td { {format!("{}-{}宀?", dy.get("start_age").and_then(|v| v.as_u64()).unwrap_or(0).to_string(), dy.get("end_age").and_then(|v| v.as_u64()).unwrap_or(0).to_string())} }
                                                 td {
                                                     {dy.get("pillar").and_then(|v| v.get("tian_gan")).and_then(|v| v.as_str()).unwrap_or("? ")}
                                                 }
@@ -1006,15 +1082,15 @@ pub fn Bazi() -> Element {
                         }
                     }
 
-                    // 排盘选项回显
+                    // 鎺掔洏閫夐」鍥炴樉
                     if let Some(options) = data.get("options") {
                         div { class: "options-display ",
-                            h4 { "选项 " }
+                            h4 { "閫夐」 " }
                             div { class: "options-display-grid ",
-                                span { "真太阳时: " {options.get("use_true_solar_time").and_then(|v| v.as_bool()).unwrap_or(false).to_string()} }
-                                span { "早晚子时: " {options.get("use_early_late_zi").and_then(|v| v.as_bool()).unwrap_or(false).to_string()} }
-                                span { "定气法: " {options.get("use_ding_qi").and_then(|v| v.as_bool()).unwrap_or(true).to_string()} }
-                                span { "经度: " {options.get("longitude").and_then(|v| v.as_f64()).unwrap_or(0.0).to_string()} }
+                                span { "鐪熷お闃虫椂: " {options.get("use_true_solar_time").and_then(|v| v.as_bool()).unwrap_or(false).to_string()} }
+                                span { "鏃╂櫄瀛愭椂: " {options.get("use_early_late_zi").and_then(|v| v.as_bool()).unwrap_or(false).to_string()} }
+                                span { "瀹氭皵娉? " {options.get("use_ding_qi").and_then(|v| v.as_bool()).unwrap_or(true).to_string()} }
+                                span { "缁忓害: " {options.get("longitude").and_then(|v| v.as_f64()).unwrap_or(0.0).to_string()} }
                             }
                         }
                     }
@@ -1024,7 +1100,7 @@ pub fn Bazi() -> Element {
     }
 }
 
-// ============ 紫微斗数 ============
+// ============ 绱井鏂楁暟 ============
 
 #[component]
 pub fn Ziwei() -> Element {
@@ -1058,13 +1134,13 @@ pub fn Ziwei() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "紫微斗数 " }
-            p { class: "page-desc ", "输入出生日期时间,排紫微斗数命盘 " }
+            h2 { "绱井鏂楁暟 " }
+            p { class: "page-desc ", "杈撳叆鍑虹敓鏃ユ湡鏃堕棿,鎺掔传寰枟鏁板懡鐩?" }
 
             div { class: "form-card ",
                 div { class: "form-row ",
                     div { class: "form-group ",
-                        label { "出生日期时间 " }
+                        label { "鍑虹敓鏃ユ湡鏃堕棿 " }
                         input {
                             r#type: "datetime-local ",
                             value: "{datetime}",
@@ -1072,12 +1148,12 @@ pub fn Ziwei() -> Element {
                         }
                     }
                     div { class: "form-group ",
-                        label { "性别 " }
+                        label { "鎬у埆 " }
                         select {
                             value: "{gender}",
                             onchange: move |evt| gender.set(evt.value()),
-                            option { value: "male", "男 " }
-                            option { value: "female", "女 " }
+                            option { value: "male", "鐢?" }
+                            option { value: "female", "濂?" }
                         }
                     }
                 }
@@ -1085,12 +1161,12 @@ pub fn Ziwei() -> Element {
                     class: "submit-btn ",
                     onclick: on_submit,
                     disabled: loading(),
-                    "排盘 "
+                    "鎺掔洏 "
                 }
             }
 
             if loading() {
-                div { class: "loading ", "排盘中... " }
+                div { class: "loading ", "鎺掔洏涓?.. " }
             }
 
             if let Some(ref err) = *error.read() {
@@ -1099,33 +1175,33 @@ pub fn Ziwei() -> Element {
 
             if let Some(ref data) = *result.read() {
                 div { class: "result-card ",
-                    h3 { "紫微斗数命盘 " }
+                    h3 { "绱井鏂楁暟鍛界洏 " }
 
                     if let Some(ming_zhu) = data.get("ming_zhu").and_then(|v| v.as_str()) {
                         div { class: "zw-info ",
-                            span { "命主: " }
+                            span { "鍛戒富: " }
                             strong { {ming_zhu} }
                         }
                     }
                     if let Some(shen_zhu) = data.get("shen_zhu").and_then(|v| v.as_str()) {
                         div { class: "zw-info ",
-                            span { "身主: " }
+                            span { "韬富: " }
                             strong { {shen_zhu} }
                         }
                     }
                     if let Some(qi_yun) = data.get("qi_yun_age").and_then(|v| v.as_u64()) {
                         div { class: "zw-info ",
-                            span { "起运年龄: " }
-                            strong { "{qi_yun}岁 " }
+                            span { "璧疯繍骞撮緞: " }
+                            strong { "{qi_yun}宀?" }
                         }
                     }
 
-                    // 四化
+                    // 鍥涘寲
                     if let Some(si_hua) = data.get("si_hua") {
                         div { class: "si-hua ",
-                            h4 { "四化 " }
+                            h4 { "鍥涘寲 " }
                             div { class: "si-hua-grid ",
-                                for (key, label) in [("hua_lu", "化禄 "), ("hua_quan", "化权 "), ("hua_ke", "化科 "), ("hua_ji", "化忌 ")] {
+                                for (key, label) in [("hua_lu", "鍖栫 "), ("hua_quan", "鍖栨潈 "), ("hua_ke", "鍖栫 "), ("hua_ji", "鍖栧繉 ")] {
                                     if let Some(item) = si_hua.get(key).and_then(|v| v.as_array()) {
                                         if item.len() >= 2 {
                                             div { class: "si-hua-item ",
@@ -1139,17 +1215,17 @@ pub fn Ziwei() -> Element {
                         }
                     }
 
-                    // 十二宫
+                    // 鍗佷簩瀹?
                     if let Some(gongs) = data.get("gongs").and_then(|v| v.as_array()) {
                         div { class: "zw-gongs ",
-                            h4 { "十二宫 " }
+                            h4 { "鍗佷簩瀹?" }
                             table { class: "data-table ",
                                 thead {
                                     tr {
-                                        th { "宫位 " }
-                                        th { "地支 " }
-                                        th { "主星 " }
-                                        th { "辅星 " }
+                                        th { "瀹綅 " }
+                                        th { "鍦版敮 " }
+                                        th { "涓绘槦 " }
+                                        th { "杈呮槦 " }
                                     }
                                 }
                                 tbody {
@@ -1174,17 +1250,17 @@ pub fn Ziwei() -> Element {
                         }
                     }
 
-                    // 大限
+                    // 澶ч檺
                     if let Some(da_xian) = data.get("da_xian").and_then(|v| v.as_array()) {
                         if !da_xian.is_empty() {
                             div { class: "da-xian ",
-                                h4 { "大限 " }
+                                h4 { "澶ч檺 " }
                                 table { class: "data-table ",
                                     thead {
                                         tr {
-                                            th { "宫位 " }
-                                            th { "年龄 " }
-                                            th { "主星 " }
+                                            th { "瀹綅 " }
+                                            th { "骞撮緞 " }
+                                            th { "涓绘槦 " }
                                         }
                                     }
                                     tbody {
@@ -1210,7 +1286,7 @@ pub fn Ziwei() -> Element {
     }
 }
 
-// ============ 数算 ============
+// ============ 鏁扮畻 ============
 
 #[component]
 pub fn ShuSuan() -> Element {
@@ -1220,13 +1296,13 @@ pub fn ShuSuan() -> Element {
     let mut loading = use_signal(|| false);
 
     let tabs = [
-        ("shaozi", "邵子神数 "),
-        ("tieban", "铁板神数 "),
-        ("beiji", "北极神数 "),
-        ("nanji", "南极神数 "),
-        ("cetian", "策天 "),
-        ("chunzi", "春子 "),
-        ("fendjing", "分经 "),
+        ("shaozi", "閭靛瓙绁炴暟 "),
+        ("tieban", "閾佹澘绁炴暟 "),
+        ("beiji", "鍖楁瀬绁炴暟 "),
+        ("nanji", "鍗楁瀬绁炴暟 "),
+        ("cetian", "绛栧ぉ "),
+        ("chunzi", "鏄ュ瓙 "),
+        ("fendjing", "鍒嗙粡 "),
     ];
 
     let on_calc = move |_| {
@@ -1253,11 +1329,11 @@ pub fn ShuSuan() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "数算 - 神数排盘 " }
-            p { class: "page-desc ", "邵子神数, 铁板神数, 北极神数, 南极神数, 策天, 春子, 分经 " }
+            h2 { "鏁扮畻 - 绁炴暟鎺掔洏 " }
+            p { class: "page-desc ", "閭靛瓙绁炴暟, 閾佹澘绁炴暟, 鍖楁瀬绁炴暟, 鍗楁瀬绁炴暟, 绛栧ぉ, 鏄ュ瓙, 鍒嗙粡 " }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "出生日期时间 " }
+                    div { class: "form-group ", label { "鍑虹敓鏃ユ湡鏃堕棿 " }
                         input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) } }
                 }
                 div { class: "tab-buttons ",
@@ -1266,17 +1342,17 @@ pub fn ShuSuan() -> Element {
                             onclick: move |_| active_tab.set(key.to_string()), "{label}" }
                     }
                 }
-                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "排盘 " }
+                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "鎺掔洏 " }
             }
-            if loading() { div { class: "loading ", "排盘中... " } }
+            if loading() { div { class: "loading ", "鎺掔洏涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "排盘结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "鎺掔洏缁撴灉 " } {json_render(data)} }
             }
         }
     }
 }
 
-// ============ 三式 ============
+// ============ 涓夊紡 ============
 
 #[component]
 pub fn Sanshi() -> Element {
@@ -1286,9 +1362,9 @@ pub fn Sanshi() -> Element {
     let mut loading = use_signal(|| false);
 
     let tabs = [
-        ("qimen", "奇门遁甲 "),
-        ("taiyi", "太乙神数 "),
-        ("liuren", "六壬 "),
+        ("qimen", "濂囬棬閬佺敳 "),
+        ("taiyi", "澶箼绁炴暟 "),
+        ("liuren", "鍏， "),
     ];
 
     let on_calc = move |_| {
@@ -1311,11 +1387,11 @@ pub fn Sanshi() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "三式合一 " }
-            p { class: "page-desc ", "奇门, 太乙, 六壬三式整合排盘 " }
+            h2 { "涓夊紡鍚堜竴 " }
+            p { class: "page-desc ", "濂囬棬, 澶箼, 鍏，涓夊紡鏁村悎鎺掔洏 " }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "日期时间 " }
+                    div { class: "form-group ", label { "鏃ユ湡鏃堕棿 " }
                         input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) } }
                 }
                 div { class: "tab-buttons ",
@@ -1324,11 +1400,11 @@ pub fn Sanshi() -> Element {
                             onclick: move |_| active_tab.set(key.to_string()), "{label}" }
                     }
                 }
-                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "排盘 " }
+                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "鎺掔洏 " }
             }
-            if loading() { div { class: "loading ", "排盘中... " } }
+            if loading() { div { class: "loading ", "鎺掔洏涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "三式结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "涓夊紡缁撴灉 " } {json_render(data)} }
             }
         }
     }
@@ -1356,12 +1432,12 @@ pub fn Qimen() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "奇门遁甲 " }
-            p { class: "page-desc ", "输入日期时间,排奇门遁甲盘 " }
+            h2 { "濂囬棬閬佺敳 " }
+            p { class: "page-desc ", "杈撳叆鏃ユ湡鏃堕棿,鎺掑闂ㄩ亖鐢茬洏 " }
             div { class: "form-card ",
                 div { class: "form-row ",
                     div { class: "form-group ",
-                        label { "日期时间 " }
+                        label { "鏃ユ湡鏃堕棿 " }
                         input {
                             r#type: "datetime-local ",
                             value: "{datetime}",
@@ -1369,19 +1445,19 @@ pub fn Qimen() -> Element {
                         }
                     }
                 }
-                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "排盘 " }
+                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "鎺掔洏 " }
             }
-            if loading() { div { class: "loading ", "排盘中... " } }
+            if loading() { div { class: "loading ", "鎺掔洏涓?.. " } }
             if let Some(ref err) = *error.read() { div { class: "error-message ", {err.clone()} } }
             if let Some(ref data) = *result.read() {
                 div { class: "result-card ",
-                    h3 { "奇门盘 " }
+                    h3 { "濂囬棬鐩?" }
                     if let Some(ju) = data.get("ju") {
-                        p { "用局: " {ju.as_str().unwrap_or("?")} }
+                        p { "鐢ㄥ眬: " {ju.as_str().unwrap_or("?")} }
                     }
                     if let Some(gongs) = data.get("gongs").and_then(|v| v.as_array()) {
                         table { class: "data-table ",
-                            thead { tr { th { "宫 " } th { "八卦 " } th { "天盘 " } th { "地盘 " } th { "八门 " } th { "九星 " } th { "八神 " } } }
+                            thead { tr { th { "瀹?" } th { "鍏崷 " } th { "澶╃洏 " } th { "鍦扮洏 " } th { "鍏棬 " } th { "涔濇槦 " } th { "鍏 " } } }
                             tbody {
                                 for gong in gongs {
                                     tr {
@@ -1423,18 +1499,18 @@ pub fn Taiyi() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "太乙神数 " }
-            p { class: "page-desc ", "太乙神数排盘:太乙十六神, 计神, 文昌, 始击, 主客大小 " }
+            h2 { "澶箼绁炴暟 " }
+            p { class: "page-desc ", "澶箼绁炴暟鎺掔洏:澶箼鍗佸叚绁? 璁＄, 鏂囨槍, 濮嬪嚮, 涓诲澶у皬 " }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "日期时间 " }
+                    div { class: "form-group ", label { "鏃ユ湡鏃堕棿 " }
                         input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) } }
                 }
-                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "排盘 " }
+                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "鎺掔洏 " }
             }
-            if loading() { div { class: "loading ", "排盘中... " } }
+            if loading() { div { class: "loading ", "鎺掔洏涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "太乙盘 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "澶箼鐩?" } {json_render(data)} }
             }
         }
     }
@@ -1460,18 +1536,18 @@ pub fn Liuren() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "六壬 " }
-            p { class: "page-desc ", "大六壬排盘:天地盘, 四课, 三传, 遁干, 贵人 " }
+            h2 { "鍏， " }
+            p { class: "page-desc ", "澶у叚澹帓鐩?澶╁湴鐩? 鍥涜, 涓変紶, 閬佸共, 璐典汉 " }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "日期时间 " }
+                    div { class: "form-group ", label { "鏃ユ湡鏃堕棿 " }
                         input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) } }
                 }
-                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "排盘 " }
+                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "鎺掔洏 " }
             }
-            if loading() { div { class: "loading ", "排盘中... " } }
+            if loading() { div { class: "loading ", "鎺掔洏涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "六壬盘 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "鍏，鐩?" } {json_render(data)} }
             }
         }
     }
@@ -1504,23 +1580,23 @@ pub fn Liuyao() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "六爻 " }
-            p { class: "page-desc ", "六爻起卦:铜钱摇卦,输入六爻数值(6/7/8/9),逗号分隔 " }
+            h2 { "鍏埢 " }
+            p { class: "page-desc ", "鍏埢璧峰崷:閾滈挶鎽囧崷,杈撳叆鍏埢鏁板€?6/7/8/9),閫楀彿鍒嗛殧 " }
             div { class: "form-card ",
                 div { class: "form-row ",
                     div { class: "form-group ",
-                        label { "六爻铜钱数 " }
-                        input { r#type: "text ", placeholder: "如: 6,7,8,6,9,7 ", value: "{coins}", oninput: move |evt| coins.set(evt.value()) }
+                        label { "鍏埢閾滈挶鏁?" }
+                        input { r#type: "text ", placeholder: "濡? 6,7,8,6,9,7 ", value: "{coins}", oninput: move |evt| coins.set(evt.value()) }
                     }
                 }
                 div { class: "form-row ",
-                    button { class: "submit-btn ", onclick: on_cast, disabled: loading(), "起卦 " }
-                    button { class: "submit-btn secondary ", onclick: on_random, "随机 " }
+                    button { class: "submit-btn ", onclick: on_cast, disabled: loading(), "璧峰崷 " }
+                    button { class: "submit-btn secondary ", onclick: on_random, "闅忔満 " }
                 }
             }
-            if loading() { div { class: "loading ", "起卦中... " } }
+            if loading() { div { class: "loading ", "璧峰崷涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "卦象 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "鍗﹁薄 " } {json_render(data)} }
             }
         }
     }
@@ -1546,13 +1622,13 @@ pub fn Jieqi() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "节气查询 " }
-            p { class: "page-desc ", "查询二十四节气精确时刻 " }
+            h2 { "鑺傛皵鏌ヨ " }
+            p { class: "page-desc ", "鏌ヨ浜屽崄鍥涜妭姘旂簿纭椂鍒?" }
 
             div { class: "form-card ",
                 div { class: "form-row ",
                     div { class: "form-group ",
-                        label { "年份 " }
+                        label { "骞翠唤 " }
                         input {
                             r#type: "number ",
                             value: "{year}",
@@ -1562,15 +1638,15 @@ pub fn Jieqi() -> Element {
                         }
                     }
                 }
-                button { class: "submit-btn ", onclick: on_query, disabled: loading(), "查询节气 " }
+                button { class: "submit-btn ", onclick: on_query, disabled: loading(), "鏌ヨ鑺傛皵 " }
             }
 
-            if loading() { div { class: "loading ", "查询中... " } }
+            if loading() { div { class: "loading ", "鏌ヨ涓?.. " } }
 
             if let Some(ref data) = *result.read() {
                 if let Some(list) = data.as_array() {
                     div { class: "result-card ",
-                        h3 { "{year()}年 二十四节气 " }
+                        h3 { "{year()}骞?浜屽崄鍥涜妭姘?" }
                         div { class: "jieqi-grid ",
                             for (i, jq) in list.iter().enumerate() {
                                 div { class: "jieqi-item ",
@@ -1581,7 +1657,7 @@ pub fn Jieqi() -> Element {
                                         {jq.get("datetime").and_then(|v| v.as_str()).unwrap_or("? ")}
                                     }
                                     div { class: "jieqi-type ",
-                                        {if jq.get("is_jie").and_then(|v| v.as_bool()).unwrap_or(false) { "节 " } else { "气 " }}
+                                        {if jq.get("is_jie").and_then(|v| v.as_bool()).unwrap_or(false) { "鑺?" } else { "姘?" }}
                                     }
                                 }
                             }
@@ -1622,36 +1698,36 @@ pub fn FengShui() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "风水 " }
-            p { class: "page-desc ", "八宅命卦, 玄空飞星, 三元九运 " }
+            h2 { "椋庢按 " }
+            p { class: "page-desc ", "鍏畢鍛藉崷, 鐜勭┖椋炴槦, 涓夊厓涔濊繍 " }
             div { class: "form-card ",
                 div { class: "tab-buttons ",
                     button { class: if active_tab() == "ming_gua" { "tab-btn active " } else { "tab-btn " },
-                        onclick: move |_| active_tab.set("ming_gua".to_string()), "八宅命卦 " }
+                        onclick: move |_| active_tab.set("ming_gua".to_string()), "鍏畢鍛藉崷 " }
                     button { class: if active_tab() == "flying_stars" { "tab-btn active " } else { "tab-btn " },
-                        onclick: move |_| active_tab.set("flying_stars".to_string()), "玄空飞星 " }
+                        onclick: move |_| active_tab.set("flying_stars".to_string()), "鐜勭┖椋炴槦 " }
                 }
                 if active_tab() == "ming_gua" {
                     div { class: "form-row ",
-                        div { class: "form-group ", label { "出生年份 " }
+                        div { class: "form-group ", label { "鍑虹敓骞翠唤 " }
                             input { r#type: "number ", value: "{year}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<i32>() { year.set(v); } } } }
-                        div { class: "form-group ", label { "性别 " }
+                        div { class: "form-group ", label { "鎬у埆 " }
                             select { value: "{gender}", onchange: move |evt| gender.set(evt.value()),
-                                option { value: "male", "男 " } option { value: "female", "女 " } } }
+                                option { value: "male", "鐢?" } option { value: "female", "濂?" } } }
                     }
                 } else {
                     div { class: "form-row ",
-                        div { class: "form-group ", label { "建房年份 " }
+                        div { class: "form-group ", label { "寤烘埧骞翠唤 " }
                             input { r#type: "number ", value: "{build_year}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<i32>() { build_year.set(v); } } } }
-                        div { class: "form-group ", label { "朝向(度) " }
+                        div { class: "form-group ", label { "鏈濆悜(搴? " }
                             input { r#type: "number ", step: "0.1 ", value: "{facing}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<f64>() { facing.set(v); } } } }
                     }
                 }
-                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "计算 " }
+                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "璁＄畻 " }
             }
-            if loading() { div { class: "loading ", "计算中... " } }
+            if loading() { div { class: "loading ", "璁＄畻涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "风水结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "椋庢按缁撴灉 " } {json_render(data)} }
             }
         }
     }
@@ -1665,14 +1741,14 @@ pub fn DivinationOther() -> Element {
     let mut num2 = use_signal(|| 0u32);
     let mut num3 = use_signal(|| 0u32);
     let mut seed = use_signal(|| 0u32);
-    let mut di_fen = use_signal(|| "子".to_string());
+    let mut di_fen = use_signal(|| "瀛?.to_string());
     let mut active_tab = use_signal(|| "jinkou".to_string());
     let mut result = use_signal(|| None::<serde_json::Value>);
     let mut loading = use_signal(|| false);
 
     let tabs = [
-        ("jinkou", "金口诀 "), ("jingjue", "荆诀 "), ("shenyishu", "神易数 "),
-        ("wuzhao", "五兆 "), ("taixuan", "太玄 "), ("xianqin", "先秦占卜 "),
+        ("jinkou", "閲戝彛璇€ "), ("jingjue", "鑽嗚瘈 "), ("shenyishu", "绁炴槗鏁?"),
+        ("wuzhao", "浜斿厗 "), ("taixuan", "澶巹 "), ("xianqin", "鍏堢Е鍗犲崪 "),
     ];
 
     let on_calc = move |_| {
@@ -1689,7 +1765,7 @@ pub fn DivinationOther() -> Element {
         } else if tab == "taixuan" {
             ("/taixuan/api", std::sync::Arc::new(serde_json::json!({ "seed": seed() })))
         } else if tab == "xianqin" {
-            ("/xianqin/divination", std::sync::Arc::new(serde_json::json!({ "seed": seed(), "method": "蓍草" })))
+            ("/xianqin/divination", std::sync::Arc::new(serde_json::json!({ "seed": seed(), "method": "钃嶈崏" })))
         } else {
             ("/jinkou/api", std::sync::Arc::new(serde_json::json!({})))
         };
@@ -1704,8 +1780,8 @@ pub fn DivinationOther() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "其他卜法 " }
-            p { class: "page-desc ", "金口诀, 荆诀, 神易数, 五兆, 太玄, 先秦占卜 " }
+            h2 { "鍏朵粬鍗滄硶 " }
+            p { class: "page-desc ", "閲戝彛璇€, 鑽嗚瘈, 绁炴槗鏁? 浜斿厗, 澶巹, 鍏堢Е鍗犲崪 " }
             div { class: "form-card ",
                 div { class: "tab-buttons ",
                     for (key, label) in tabs.clone() {
@@ -1715,47 +1791,47 @@ pub fn DivinationOther() -> Element {
                 }
                 if active_tab() == "jinkou" {
                     div { class: "form-row ",
-                        div { class: "form-group ", label { "日期时间 " }
+                        div { class: "form-group ", label { "鏃ユ湡鏃堕棿 " }
                             input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) } }
-                        div { class: "form-group ", label { "地分 " }
+                        div { class: "form-group ", label { "鍦板垎 " }
                             input { r#type: "text ", value: "{di_fen}", oninput: move |evt| di_fen.set(evt.value()) } }
                     }
                 } else if active_tab() == "shenyishu" {
                     div { class: "form-row ",
-                        div { class: "form-group ", label { "数一 " }
+                        div { class: "form-group ", label { "鏁颁竴 " }
                             input { r#type: "number ", value: "{num1}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<u32>() { num1.set(v); } } } }
-                        div { class: "form-group ", label { "数二 " }
+                        div { class: "form-group ", label { "鏁颁簩 " }
                             input { r#type: "number ", value: "{num2}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<u32>() { num2.set(v); } } } }
-                        div { class: "form-group ", label { "数三 " }
+                        div { class: "form-group ", label { "鏁颁笁 " }
                             input { r#type: "number ", value: "{num3}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<u32>() { num3.set(v); } } } }
                     }
                 } else if active_tab() == "wuzhao" {
                     div { class: "form-row ",
-                        div { class: "form-group ", label { "问事 " }
+                        div { class: "form-group ", label { "闂簨 " }
                             input { r#type: "text ", value: "{question}", oninput: move |evt| question.set(evt.value()) } }
                     }
                 } else if active_tab() == "taixuan" || active_tab() == "xianqin" {
                     div { class: "form-row ",
-                        div { class: "form-group ", label { "种子数 " }
+                        div { class: "form-group ", label { "绉嶅瓙鏁?" }
                             input { r#type: "number ", value: "{seed}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<u32>() { seed.set(v); } } } }
                     }
                 } else {
                     div { class: "form-row ",
-                        div { class: "form-group ", label { "日期时间 " }
+                        div { class: "form-group ", label { "鏃ユ湡鏃堕棿 " }
                             input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) } }
                     }
                 }
-                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "推算 " }
+                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "鎺ㄧ畻 " }
             }
-            if loading() { div { class: "loading ", "推算中... " } }
+            if loading() { div { class: "loading ", "鎺ㄧ畻涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "推算结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "鎺ㄧ畻缁撴灉 " } {json_render(data)} }
             }
         }
     }
 }
 
-// ============ 工具 ============
+// ============ 宸ュ叿 ============
 
 #[component]
 pub fn AiAnalysis() -> Element {
@@ -1777,19 +1853,19 @@ pub fn AiAnalysis() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "AI 分析 " }
-            p { class: "page-desc ", "多模型接入, 测试对话, 命理理解读 " }
+            h2 { "AI 鍒嗘瀽 " }
+            p { class: "page-desc ", "澶氭ā鍨嬫帴鍏? 娴嬭瘯瀵硅瘽, 鍛界悊鐞嗚В璇?" }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "提问 " }
+                    div { class: "form-group ", label { "鎻愰棶 " }
                         textarea { value: "{message}", oninput: move |evt| message.set(evt.value()),
-                            placeholder: "输入命理分析问题... ", rows: "4 " } }
+                            placeholder: "杈撳叆鍛界悊鍒嗘瀽闂... ", rows: "4 " } }
                 }
-                button { class: "submit-btn ", onclick: on_send, disabled: loading(), "发送 " }
+                button { class: "submit-btn ", onclick: on_send, disabled: loading(), "鍙戦€?" }
             }
-            if loading() { div { class: "loading ", "AI思考中... " } }
+            if loading() { div { class: "loading ", "AI鎬濊€冧腑... " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "AI 回答 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "AI 鍥炵瓟 " } {json_render(data)} }
             }
         }
     }
@@ -1816,28 +1892,28 @@ pub fn Planetarium() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "天文馆 " }
-            p { class: "page-desc ", "实时天象:太阳星度, 月相, 可见行星位置 " }
+            h2 { "澶╂枃棣?" }
+            p { class: "page-desc ", "瀹炴椂澶╄薄:澶槼鏄熷害, 鏈堢浉, 鍙琛屾槦浣嶇疆 " }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "纬度 " }
+                    div { class: "form-group ", label { "绾害 " }
                         input { r#type: "number ", step: "0.0001 ", value: "{latitude}",
                             oninput: move |evt| { if let Ok(v) = evt.value().parse::<f64>() { latitude.set(v); } } } }
-                    div { class: "form-group ", label { "经度 " }
+                    div { class: "form-group ", label { "缁忓害 " }
                         input { r#type: "number ", step: "0.0001 ", value: "{longitude}",
                             oninput: move |evt| { if let Ok(v) = evt.value().parse::<f64>() { longitude.set(v); } } } }
                 }
-                button { class: "submit-btn ", onclick: on_query, disabled: loading(), "查询天象 " }
+                button { class: "submit-btn ", onclick: on_query, disabled: loading(), "鏌ヨ澶╄薄 " }
             }
-            if loading() { div { class: "loading ", "查询中... " } }
+            if loading() { div { class: "loading ", "鏌ヨ涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "当前天象 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "褰撳墠澶╄薄 " } {json_render(data)} }
             }
         }
     }
 }
 
-// ============ 万年历(黄历)============
+// ============ 涓囧勾鍘?榛勫巻)============
 
 #[component]
 pub fn Almanac() -> Element {
@@ -1888,13 +1964,13 @@ pub fn Almanac() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "黄历 - 万年历 " }
-            p { class: "page-desc ", "寿星天文历----公历/农历/回历三历转换, 日月食, 干支节气 " }
+            h2 { "榛勫巻 - 涓囧勾鍘?" }
+            p { class: "page-desc ", "瀵挎槦澶╂枃鍘?---鍏巻/鍐滃巻/鍥炲巻涓夊巻杞崲, 鏃ユ湀椋? 骞叉敮鑺傛皵 " }
 
             div { class: "form-card ",
                 div { class: "form-row ",
                     div { class: "form-group ",
-                        label { "年 " }
+                        label { "骞?" }
                         input {
                             r#type: "number ",
                             value: "{year}",
@@ -1904,7 +1980,7 @@ pub fn Almanac() -> Element {
                         }
                     }
                     div { class: "form-group ",
-                        label { "月 " }
+                        label { "鏈?" }
                         input {
                             r#type: "number ",
                             min: "1 ",
@@ -1916,7 +1992,7 @@ pub fn Almanac() -> Element {
                         }
                     }
                     div { class: "form-group ",
-                        label { "日 " }
+                        label { "鏃?" }
                         input {
                             r#type: "number ",
                             min: "1 ",
@@ -1933,17 +2009,17 @@ pub fn Almanac() -> Element {
                     button {
                         class: if active_tab() == "lunar" { "tab-btn active " } else { "tab-btn " },
                         onclick: move |_| { active_tab.set("lunar".to_string()); },
-                        "公历转农历 "
+                        "鍏巻杞啘鍘?"
                     }
                     button {
                         class: if active_tab() == "ganzhi" { "tab-btn active " } else { "tab-btn " },
                         onclick: move |_| { active_tab.set("ganzhi".to_string()); },
-                        "干支查询 "
+                        "骞叉敮鏌ヨ "
                     }
                     button {
                         class: if active_tab() == "eclipse" { "tab-btn active " } else { "tab-btn " },
                         onclick: move |_| { active_tab.set("eclipse".to_string()); },
-                        "日月食 "
+                        "鏃ユ湀椋?"
                     }
                 }
 
@@ -1954,33 +2030,33 @@ pub fn Almanac() -> Element {
                                 class: "submit-btn ",
                                 onclick: on_solar_to_lunar,
                                 disabled: loading(),
-                                "查询农历 "
+                                "鏌ヨ鍐滃巻 "
                             }
-                            if loading() { div { class: "loading ", "查询中... " } }
+                            if loading() { div { class: "loading ", "鏌ヨ涓?.. " } }
                             if let Some(ref data) = *lunar_result.read() {
                                 div { class: "result-card lunar-card ",
-                                    h3 { "农历转换结果 " }
+                                    h3 { "鍐滃巻杞崲缁撴灉 " }
                                     div { class: "lunar-info ",
                                         div { class: "lunar-row ",
-                                            span { class: "lunar-label ", "农历日期: " }
+                                            span { class: "lunar-label ", "鍐滃巻鏃ユ湡: " }
                                             span { class: "lunar-value ",
-                                                {data.get("year").and_then(|v| v.as_i64()).unwrap_or(0).to_string()} "年"
+                                                {data.get("year").and_then(|v| v.as_i64()).unwrap_or(0).to_string()} "骞?
                                                 {data.get("month_name_zh").and_then(|v| v.as_str()).unwrap_or("? ")}
                                                 {data.get("day_name_zh").and_then(|v| v.as_str()).unwrap_or("? ")}
                                             }
                                         }
                                         div { class: "lunar-row ",
-                                            span { class: "lunar-label ", "年干支 " }
+                                            span { class: "lunar-label ", "骞村共鏀?" }
                                             span { class: "lunar-value ", {data.get("year_ganzhi").and_then(|v| v.as_str()).unwrap_or("? ")} }
                                         }
                                         div { class: "lunar-row ",
-                                            span { class: "lunar-label ", "生肖: " }
+                                            span { class: "lunar-label ", "鐢熻倴: " }
                                             span { class: "lunar-value ", {data.get("zodiac_animal").and_then(|v| v.as_str()).unwrap_or("? ")} }
                                         }
                                         if let Some(leap) = data.get("is_leap_month").and_then(|v| v.as_bool()) {
                                             if leap {
                                                 div { class: "lunar-row ",
-                                                    span { class: "lunar-label lunar-leap ", "(闰月) " }
+                                                    span { class: "lunar-label lunar-leap ", "(闂版湀) " }
                                                 }
                                             }
                                         }
@@ -1994,17 +2070,17 @@ pub fn Almanac() -> Element {
                                 class: "submit-btn ",
                                 onclick: on_ganzhi,
                                 disabled: loading(),
-                                "查询干支 "
+                                "鏌ヨ骞叉敮 "
                             }
-                            if loading() { div { class: "loading ", "查询中... " } }
+                            if loading() { div { class: "loading ", "鏌ヨ涓?.. " } }
                             if let Some(ref data) = *ganzhi_result.read() {
                                 div { class: "result-card ",
-                                    h3 { "干支信息 " }
+                                    h3 { "骞叉敮淇℃伅 " }
                                     table { class: "data-table ",
                                         tbody {
-                                            tr { td { "年干支 " } td { {data.get("year_ganzhi").and_then(|v| v.as_str()).unwrap_or("? ")} } }
-                                            tr { td { "生肖 " } td { {data.get("zodiac").and_then(|v| v.as_str()).unwrap_or("? ")} } }
-                                            tr { td { "年号 " } td { {data.get("nianhao").and_then(|v| v.as_str()).unwrap_or("? ")} } }
+                                            tr { td { "骞村共鏀?" } td { {data.get("year_ganzhi").and_then(|v| v.as_str()).unwrap_or("? ")} } }
+                                            tr { td { "鐢熻倴 " } td { {data.get("zodiac").and_then(|v| v.as_str()).unwrap_or("? ")} } }
+                                            tr { td { "骞村彿 " } td { {data.get("nianhao").and_then(|v| v.as_str()).unwrap_or("? ")} } }
                                         }
                                     }
                                 }
@@ -2016,22 +2092,22 @@ pub fn Almanac() -> Element {
                                 class: "submit-btn ",
                                 onclick: on_eclipses,
                                 disabled: loading(),
-                                "查询日月食 "
+                                "鏌ヨ鏃ユ湀椋?"
                             }
-                            if loading() { div { class: "loading ", "查询中... " } }
+                            if loading() { div { class: "loading ", "鏌ヨ涓?.. " } }
                             if let Some(ref data) = *eclipse_result.read() {
                                 if let Some(list) = data.as_array() {
                                     div { class: "result-card ",
-                                        h3 { "{year()}年 日月食 " }
+                                        h3 { "{year()}骞?鏃ユ湀椋?" }
                                         if list.is_empty() {
-                                            p { class: "empty-state ", "该年无日月食 " }
+                                            p { class: "empty-state ", "璇ュ勾鏃犳棩鏈堥 " }
                                         } else {
                                             table { class: "data-table ",
                                                 thead {
                                                     tr {
-                                                        th { "日期 " }
-                                                        th { "类型 " }
-                                                        th { "食分 " }
+                                                        th { "鏃ユ湡 " }
+                                                        th { "绫诲瀷 " }
+                                                        th { "椋熷垎 " }
                                                     }
                                                 }
                                                 tbody {
@@ -2056,18 +2132,18 @@ pub fn Almanac() -> Element {
     }
 }
 
-// ============ 其他页面 ============
+// ============ 鍏朵粬椤甸潰 ============
 
 #[component]
 pub fn References() -> Element {
     rsx! {
         div { class: "page ",
-            h2 { "辅助参考 " }
-            p { class: "page-desc ", "八卦分类, 天干地支, 节气查询 " }
+            h2 { "杈呭姪鍙傝€?" }
+            p { class: "page-desc ", "鍏崷鍒嗙被, 澶╁共鍦版敮, 鑺傛皵鏌ヨ " }
             div { class: "result-card ",
-                h3 { "六十四卦 " }
+                h3 { "鍏崄鍥涘崷 " }
                 div { class: "ref-grid ",
-                    for gua in &["乾 ", "坤 ", "屯 ", "蒙 ", "需 ", "讼 ", "师 ", "比 ", "小畜 ", "履 ", "泰 ", "否 ", "同人 ", "大有 ", "谦 ", "豫 ", "随 ", "蛊 ", "临 ", "观 ", "噬嗑 ", "贲 ", "剥 ", "复 ", "无妄 ", "大畜 ", "颐 ", "大过 ", "坎 ", "离 ", "咸 ", "恒 ", "遁 ", "大壮 ", "晋 ", "明夷 ", "家人 ", "睽 ", "蹇 ", "解 ", "损 ", "益 ", "夬 ", "姤 ", "萃 ", "升 ", "困 ", "井 ", "革 ", "鼎 ", "震 ", "艮 ", "渐 ", "归妹 ", "丰 ", "旅 ", "巽 ", "兑 ", "涣 ", "节 ", "中孚 ", "小过 ", "既济 ", "未济 "] {
+                    for gua in &["涔?", "鍧?", "灞?", "钂?", "闇€ ", "璁?", "甯?", "姣?", "灏忕暅 ", "灞?", "娉?", "鍚?", "鍚屼汉 ", "澶ф湁 ", "璋?", "璞?", "闅?", "铔?", "涓?", "瑙?", "鍣棏 ", "璐?", "鍓?", "澶?", "鏃犲 ", "澶х暅 ", "棰?", "澶ц繃 ", "鍧?", "绂?", "鍜?", "鎭?", "閬?", "澶у． ", "鏅?", "鏄庡し ", "瀹朵汉 ", "鐫?", "韫?", "瑙?", "鎹?", "鐩?", "澶?", "濮?", "钀?", "鍗?", "鍥?", "浜?", "闈?", "榧?", "闇?", "鑹?", "娓?", "褰掑 ", "涓?", "鏃?", "宸?", "鍏?", "娑?", "鑺?", "涓瓪 ", "灏忚繃 ", "鏃㈡祹 ", "鏈祹 "] {
                         div { class: "ref-item ", "{gua}" }
                     }
                 }
@@ -2088,19 +2164,19 @@ pub fn Settings() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "设置 " }
-            p { class: "page-desc ", "应用设置 " }
+            h2 { "璁剧疆 " }
+            p { class: "page-desc ", "搴旂敤璁剧疆 " }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "主题 " }
+                    div { class: "form-group ", label { "涓婚 " }
                         select { value: "{theme}", onchange: move |evt| theme.set(evt.value()),
-                            option { value: "light", "浅色 " } option { value: "dark", "深色 " } } }
-                    div { class: "form-group ", label { "语言 " }
+                            option { value: "light", "娴呰壊 " } option { value: "dark", "娣辫壊 " } } }
+                    div { class: "form-group ", label { "璇█ " }
                         select { value: "{language}", onchange: move |evt| language.set(evt.value()),
-                            option { value: "zh", "中文 " } option { value: "en", "English " } } }
+                            option { value: "zh", "涓枃 " } option { value: "en", "English " } } }
                 }
-                button { class: "submit-btn ", onclick: on_save, "保存设置 " }
-                if saved() { div { class: "success-msg ", "设置已保存 " } }
+                button { class: "submit-btn ", onclick: on_save, "淇濆瓨璁剧疆 " }
+                if saved() { div { class: "success-msg ", "璁剧疆宸蹭繚瀛?" } }
             }
         }
     }
@@ -2110,9 +2186,9 @@ pub fn Settings() -> Element {
 pub fn GuoLao() -> Element {
     rsx! {
         div { class: "page ",
-            h2 { "果老星宗 " }
-            p { class: "page-desc ", "果老星宗推演, 二十八宿命度身度 " }
-            p { "请使用七政四余页面进行排盘,果老星宗与七政四余使用同一计算引擎. " }
+            h2 { "鏋滆€佹槦瀹?" }
+            p { class: "page-desc ", "鏋滆€佹槦瀹楁帹婕? 浜屽崄鍏鍛藉害韬害 " }
+            p { "璇蜂娇鐢ㄤ竷鏀垮洓浣欓〉闈㈣繘琛屾帓鐩?鏋滆€佹槦瀹椾笌涓冩斂鍥涗綑浣跨敤鍚屼竴璁＄畻寮曟搸. " }
         }
     }
 }
@@ -2146,35 +2222,35 @@ pub fn GuaZhan() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "卦占 " }
-            p { class: "page-desc ", "梅花易数, 六爻卦占 " }
+            h2 { "鍗﹀崰 " }
+            p { class: "page-desc ", "姊呰姳鏄撴暟, 鍏埢鍗﹀崰 " }
             div { class: "form-card ",
                 div { class: "tab-buttons ",
                     button { class: if active_tab() == "meihua" { "tab-btn active " } else { "tab-btn " },
-                        onclick: move |_| active_tab.set("meihua".to_string()), "梅花易数 " }
+                        onclick: move |_| active_tab.set("meihua".to_string()), "姊呰姳鏄撴暟 " }
                     button { class: if active_tab() == "meiyi" { "tab-btn active " } else { "tab-btn " },
-                        onclick: move |_| active_tab.set("meiyi".to_string()), "六爻占 " }
+                        onclick: move |_| active_tab.set("meiyi".to_string()), "鍏埢鍗?" }
                 }
                 if active_tab() == "meihua" {
                     div { class: "form-row ",
-                        div { class: "form-group ", label { "数一 " }
+                        div { class: "form-group ", label { "鏁颁竴 " }
                             input { r#type: "number ", value: "{num1}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<u32>() { num1.set(v); } } } }
-                        div { class: "form-group ", label { "数二 " }
+                        div { class: "form-group ", label { "鏁颁簩 " }
                             input { r#type: "number ", value: "{num2}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<u32>() { num2.set(v); } } } }
-                        div { class: "form-group ", label { "数三 " }
+                        div { class: "form-group ", label { "鏁颁笁 " }
                             input { r#type: "number ", value: "{num3}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<u32>() { num3.set(v); } } } }
                     }
                 } else {
                     div { class: "form-row ",
-                        div { class: "form-group ", label { "日期时间 " }
+                        div { class: "form-group ", label { "鏃ユ湡鏃堕棿 " }
                             input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) } }
                     }
                 }
-                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "起卦 " }
+                button { class: "submit-btn ", onclick: on_calc, disabled: loading(), "璧峰崷 " }
             }
-            if loading() { div { class: "loading ", "起卦中... " } }
+            if loading() { div { class: "loading ", "璧峰崷涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "卦象 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "鍗﹁薄 " } {json_render(data)} }
             }
         }
     }
@@ -2184,9 +2260,9 @@ pub fn GuaZhan() -> Element {
 pub fn DunJia() -> Element {
     rsx! {
         div { class: "page ",
-            h2 { "遁甲 " }
-            p { class: "page-desc ", "遁甲包括:青龙遁, 白虎遁等 " }
-            p { "请使用奇门遁甲页面进行排盘,遁甲与奇门使用同一计算引擎. " }
+            h2 { "閬佺敳 " }
+            p { class: "page-desc ", "閬佺敳鍖呮嫭:闈掗緳閬? 鐧借檸閬佺瓑 " }
+            p { "璇蜂娇鐢ㄥ闂ㄩ亖鐢查〉闈㈣繘琛屾帓鐩?閬佺敳涓庡闂ㄤ娇鐢ㄥ悓涓€璁＄畻寮曟搸. " }
         }
     }
 }
@@ -2211,19 +2287,19 @@ pub fn Gua() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "卦象 " }
-            p { class: "page-desc ", "六十四卦, 卦象关系, 卦辞爻辞 " }
+            h2 { "鍗﹁薄 " }
+            p { class: "page-desc ", "鍏崄鍥涘崷, 鍗﹁薄鍏崇郴, 鍗﹁緸鐖昏緸 " }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "卦序 (0-63) " }
+                    div { class: "form-group ", label { "鍗﹀簭 (0-63) " }
                         input { r#type: "number ", min: "0 ", max: "63 ", value: "{gua_seq}",
                             oninput: move |evt| { if let Ok(v) = evt.value().parse::<u32>() { gua_seq.set(v); } } } }
                 }
-                button { class: "submit-btn ", onclick: on_query, disabled: loading(), "查询 " }
+                button { class: "submit-btn ", onclick: on_query, disabled: loading(), "鏌ヨ " }
             }
-            if loading() { div { class: "loading ", "查询中... " } }
+            if loading() { div { class: "loading ", "鏌ヨ涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "卦象详情 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "鍗﹁薄璇︽儏 " } {json_render(data)} }
             }
         }
     }
@@ -2233,19 +2309,19 @@ pub fn Gua() -> Element {
 pub fn About() -> Element {
     rsx! {
         div { class: "page about-page ",
-            h2 { "关于Divines " }
-            p { "版本: 0.1.0 (基于 Rust 重写) " }
-            p { "Divines 是一个全面的玄学工作站. " }
-            p { "西方占星的本命, 推运, 关系盘,连同八字, 紫微, 奇门, 六壬, 太乙这些中国传统术数,被放进同一个应用里. " }
-            p { "最新版本基于 Rust 全栈重写,前端使用 Dioxus 0.7.9. " }
-            p { "原项目地址: https://github.com/Horace-Maxwell/divines-Web-App-comprehensively-improved-MacOS " }
-            p { "万年历参考: 寿星天文历(sxwnl) " }
-            p { "许可: AGPL-3.0 " }
+            h2 { "鍏充簬Divines " }
+            p { "鐗堟湰: 0.1.0 (鍩轰簬 Rust 閲嶅啓) " }
+            p { "Divines 鏄竴涓叏闈㈢殑鐜勫宸ヤ綔绔? " }
+            p { "瑗挎柟鍗犳槦鐨勬湰鍛? 鎺ㄨ繍, 鍏崇郴鐩?杩炲悓鍏瓧, 绱井, 濂囬棬, 鍏，, 澶箼杩欎簺涓浗浼犵粺鏈暟,琚斁杩涘悓涓€涓簲鐢ㄩ噷. " }
+            p { "鏈€鏂扮増鏈熀浜?Rust 鍏ㄦ爤閲嶅啓,鍓嶇浣跨敤 Dioxus 0.7.9. " }
+            p { "鍘熼」鐩湴鍧€: https://github.com/Horace-Maxwell/divines-Web-App-comprehensively-improved-MacOS " }
+            p { "涓囧勾鍘嗗弬鑰? 瀵挎槦澶╂枃鍘?sxwnl) " }
+            p { "璁稿彲: AGPL-3.0 " }
         }
     }
 }
 
-// ============ 传统术数 - 数算与神数 ============
+// ============ 浼犵粺鏈暟 - 鏁扮畻涓庣鏁?============
 
 #[component]
 pub fn HuangJi() -> Element {
@@ -2267,12 +2343,12 @@ pub fn HuangJi() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "皇极经世 " }
-            p { class: "page-desc ", "皇极经世元会运世推算,值年卦, 值事卦 " }
+            h2 { "鐨囨瀬缁忎笘 " }
+            p { class: "page-desc ", "鐨囨瀬缁忎笘鍏冧細杩愪笘鎺ㄧ畻,鍊煎勾鍗? 鍊间簨鍗?" }
             div { class: "form-card ",
                 div { class: "form-row ",
                     div { class: "form-group ",
-                        label { "年份 " }
+                        label { "骞翠唤 " }
                         input {
                             r#type: "number ",
                             value: "{year}",
@@ -2282,13 +2358,13 @@ pub fn HuangJi() -> Element {
                         }
                     }
                 }
-                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "推算 " }
+                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "鎺ㄧ畻 " }
             }
-            if loading() { div { class: "loading ", "推算中... " } }
+            if loading() { div { class: "loading ", "鎺ㄧ畻涓?.. " } }
             if let Some(ref data) = *result.read() {
                 div { class: "result-card ",
-                    h3 { "皇极经世结果 " }
-                    pre { {data.to_string()} }
+                    h3 { "鐨囨瀬缁忎笘缁撴灉 " }
+                    {json_render(data)}
                 }
             }
         }
@@ -2316,20 +2392,20 @@ pub fn JingJue() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "荆诀 " }
-            p { class: "page-desc ", "荆诀流年推演:以出生时间推算各年运势 " }
+            h2 { "鑽嗚瘈 " }
+            p { class: "page-desc ", "鑽嗚瘈娴佸勾鎺ㄦ紨:浠ュ嚭鐢熸椂闂存帹绠楀悇骞磋繍鍔?" }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "出生日期时间 " }
+                    div { class: "form-group ", label { "鍑虹敓鏃ユ湡鏃堕棿 " }
                         input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) } }
-                    div { class: "form-group ", label { "查询年份 " }
+                    div { class: "form-group ", label { "鏌ヨ骞翠唤 " }
                         input { r#type: "number ", value: "{query_year}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<i32>() { query_year.set(v); } } } }
                 }
-                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "推算 " }
+                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "鎺ㄧ畻 " }
             }
-            if loading() { div { class: "loading ", "推算中... " } }
+            if loading() { div { class: "loading ", "鎺ㄧ畻涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "荆诀推演结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "鑽嗚瘈鎺ㄦ紨缁撴灉 " } {json_render(data)} }
             }
         }
     }
@@ -2338,7 +2414,7 @@ pub fn JingJue() -> Element {
 #[component]
 pub fn JinKou() -> Element {
     let mut datetime = use_signal(|| String::new());
-    let mut di_fen = use_signal(|| "子".to_string());
+    let mut di_fen = use_signal(|| "瀛?.to_string());
     let mut result = use_signal(|| None::<serde_json::Value>);
     let mut loading = use_signal(|| false);
 
@@ -2356,20 +2432,20 @@ pub fn JinKou() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "金口诀 " }
-            p { class: "page-desc ", "金口诀排盘:月将, 地分, 将神, 贵神, 人元 " }
+            h2 { "閲戝彛璇€ " }
+            p { class: "page-desc ", "閲戝彛璇€鎺掔洏:鏈堝皢, 鍦板垎, 灏嗙, 璐电, 浜哄厓 " }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "日期时间 " }
+                    div { class: "form-group ", label { "鏃ユ湡鏃堕棿 " }
                         input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) } }
-                    div { class: "form-group ", label { "地分 " }
-                        input { r#type: "text ", placeholder: "子丑寅卯辰巳午未申酉戌亥 ", value: "{di_fen}", oninput: move |evt| di_fen.set(evt.value()) } }
+                    div { class: "form-group ", label { "鍦板垎 " }
+                        input { r#type: "text ", placeholder: "瀛愪笐瀵呭嵂杈板烦鍗堟湭鐢抽厜鎴屼亥 ", value: "{di_fen}", oninput: move |evt| di_fen.set(evt.value()) } }
                 }
-                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "排盘 " }
+                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "鎺掔洏 " }
             }
-            if loading() { div { class: "loading ", "排盘中... " } }
+            if loading() { div { class: "loading ", "鎺掔洏涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "金口诀排盘结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "閲戝彛璇€鎺掔洏缁撴灉 " } {json_render(data)} }
             }
         }
     }
@@ -2397,22 +2473,22 @@ pub fn ShenYiShu() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "神易数 " }
-            p { class: "page-desc ", "神易数三数起卦:以三个数字起卦推断吉凶 " }
+            h2 { "绁炴槗鏁?" }
+            p { class: "page-desc ", "绁炴槗鏁颁笁鏁拌捣鍗?浠ヤ笁涓暟瀛楄捣鍗︽帹鏂悏鍑?" }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "数一 " }
+                    div { class: "form-group ", label { "鏁颁竴 " }
                         input { r#type: "number ", value: "{num1}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<u32>() { num1.set(v); } } } }
-                    div { class: "form-group ", label { "数二 " }
+                    div { class: "form-group ", label { "鏁颁簩 " }
                         input { r#type: "number ", value: "{num2}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<u32>() { num2.set(v); } } } }
-                    div { class: "form-group ", label { "数三 " }
+                    div { class: "form-group ", label { "鏁颁笁 " }
                         input { r#type: "number ", value: "{num3}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<u32>() { num3.set(v); } } } }
                 }
-                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "起卦 " }
+                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "璧峰崷 " }
             }
-            if loading() { div { class: "loading ", "起卦中... " } }
+            if loading() { div { class: "loading ", "璧峰崷涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "神易数结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "绁炴槗鏁扮粨鏋?" } {json_render(data)} }
             }
         }
     }
@@ -2438,18 +2514,18 @@ pub fn WuZhao() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "五兆 " }
-            p { class: "page-desc ", "五兆卜占卜:以问事为引,推演五行兆象 " }
+            h2 { "浜斿厗 " }
+            p { class: "page-desc ", "浜斿厗鍗滃崰鍗?浠ラ棶浜嬩负寮?鎺ㄦ紨浜旇鍏嗚薄 " }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "问事 " }
-                        input { r#type: "text ", placeholder: "输入您想问的事... ", value: "{question}", oninput: move |evt| question.set(evt.value()) } }
+                    div { class: "form-group ", label { "闂簨 " }
+                        input { r#type: "text ", placeholder: "杈撳叆鎮ㄦ兂闂殑浜?.. ", value: "{question}", oninput: move |evt| question.set(evt.value()) } }
                 }
-                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "占卜 " }
+                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "鍗犲崪 " }
             }
-            if loading() { div { class: "loading ", "占卜中... " } }
+            if loading() { div { class: "loading ", "鍗犲崪涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "五兆占卜结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "浜斿厗鍗犲崪缁撴灉 " } {json_render(data)} }
             }
         }
     }
@@ -2475,18 +2551,18 @@ pub fn TaiXuan() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "太玄 " }
-            p { class: "page-desc ", "太玄经法:随机推算,81首729赞 " }
+            h2 { "澶巹 " }
+            p { class: "page-desc ", "澶巹缁忔硶:闅忔満鎺ㄧ畻,81棣?29璧?" }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "种子数 " }
+                    div { class: "form-group ", label { "绉嶅瓙鏁?" }
                         input { r#type: "number ", value: "{seed}", oninput: move |evt| { if let Ok(v) = evt.value().parse::<u32>() { seed.set(v); } } } }
                 }
-                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "推算 " }
+                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "鎺ㄧ畻 " }
             }
-            if loading() { div { class: "loading ", "推算中... " } }
+            if loading() { div { class: "loading ", "鎺ㄧ畻涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "太玄结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "澶巹缁撴灉 " } {json_render(data)} }
             }
         }
     }
@@ -2512,177 +2588,225 @@ pub fn BeiJi() -> Element {
 
     rsx! {
         div { class: "page ",
-            h2 { "北极神数 " }
-            p { class: "page-desc ", "北极神数排盘:八字推算, 六爻定位, 神数条文 " }
+            h2 { "鍖楁瀬绁炴暟 " }
+            p { class: "page-desc ", "鍖楁瀬绁炴暟鎺掔洏:鍏瓧鎺ㄧ畻, 鍏埢瀹氫綅, 绁炴暟鏉℃枃 " }
             div { class: "form-card ",
                 div { class: "form-row ",
-                    div { class: "form-group ", label { "出生日期时间 " }
+                    div { class: "form-group ", label { "鍑虹敓鏃ユ湡鏃堕棿 " }
                         input { r#type: "datetime-local ", value: "{datetime}", oninput: move |evt| datetime.set(evt.value()) } }
                 }
-                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "排盘 " }
+                button { class: "submit-btn ", onclick: on_submit, disabled: loading(), "鎺掔洏 " }
             }
-            if loading() { div { class: "loading ", "排盘中... " } }
+            if loading() { div { class: "loading ", "鎺掔洏涓?.. " } }
             if let Some(ref data) = *result.read() {
-                div { class: "result-card ", h3 { "北极神数排盘结果 " } pre { {data.to_string()} } }
+                div { class: "result-card ", h3 { "鍖楁瀬绁炴暟鎺掔洏缁撴灉 " } {json_render(data)} }
             }
         }
     }
 }
 
+// ============ 鏁扮畻绁炴暟绯诲垪 ============
+
 #[component]
 pub fn CeTian() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "绛栧ぉ" } p { class: "page-desc", "绛栧ぉ鎺ㄦ紨:浠ュぉ鏃朵汉浜嬬瓥绠楀悏鍑?缁撳悎骞叉敮涓庡崷璞℃帹婕? }
+        div { class: "result-card", p { "绛栧ぉ鎺掔洏鍔熻兘寮€鍙戜腑,灏嗘敮鎸佸共鏀捣璇句笌绛栫畻鎺ㄦ紨銆? } } } }
 }
 
 #[component]
 pub fn ChunZi() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "鏄ュ瓙" } p { class: "page-desc", "鏄ュ瓙鎺ㄧ畻娉?浠ュ嚭鐢熷勾骞茶捣绠?鍒嗘槬瀛愬崄浜屽嵎" }
+        div { class: "result-card", p { "鏄ュ瓙鎺掔洏鍔熻兘寮€鍙戜腑,灏嗘敮鎸佸崄浜屽嵎鏉℃枃妫€绱€? } } } }
 }
 
 #[component]
 pub fn FenJing() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "鍒嗙粡" } p { class: "page-desc", "鍒嗙粡鎺ㄦ紨:浠ュ垎缁忔硶鎺ㄦ紨鍏崄鍥涘崷,缁撳悎涓栧簲鐖讳綅" }
+        div { class: "result-card", p { "鍒嗙粡鎺掔洏鍔熻兘寮€鍙戜腑,灏嗘敮鎸佸崷鐖诲垎缁忔绱€? } } } }
 }
 
 #[component]
 pub fn NanJi() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "鍗楁瀬绁炴暟" } p { class: "page-desc", "鍗楁瀬绁炴暟:浠ョ敓杈板叓瀛楁帹绠楃鏁版潯鏂?鍖呭惈鍥涚櫨浜屽崄鍏潯" }
+        div { class: "result-card", p { "鍗楁瀬绁炴暟鎺掔洏鍔熻兘寮€鍙戜腑,灏嗘敮鎸佸洓鏌辫捣鏁颁笌鏉℃枃鏌ュ銆? } } } }
 }
 
 #[component]
 pub fn ShaoZi() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "閭靛瓙绁炴暟" } p { class: "page-desc", "閭靛瓙绁炴暟:閭甸泹鎵€浼犵鏁版帹婕旂郴缁?鍖呭惈涓€鍗冮浂浜屽崄鍥涘崷" }
+        div { class: "result-card", p { "閭靛瓙绁炴暟鎺掔洏鍔熻兘寮€鍙戜腑,灏嗘敮鎸佸厓浼氳繍涓栬捣鍗︺€? } } } }
 }
 
 #[component]
 pub fn TieBan() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "閾佹澘绁炴暟" } p { class: "page-desc", "閾佹澘绁炴暟:浠ュ洓鏌卞叓瀛椾负鍩虹,缁撳悎鍗﹁薄鎺ㄦ紨涓€鐢熻繍鍔? }
+        div { class: "result-card", p { "閾佹澘绁炴暟鎺掔洏鍔熻兘寮€鍙戜腑,灏嗘敮鎸佸崄浜屼竾鏉℃潯鏂囨绱€? } } } }
 }
 
 #[component]
 pub fn XianQin() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "鍏堢Е鍗犲崪" } p { class: "page-desc", "鍏堢Е鍗犲崪:鍖呮嫭鐢查鐏奸緹銆佽搷鑽夊崰鍗溿€佽繛灞卞綊钘忕瓑涓婂彜鍗滄硶" }
+        div { class: "result-card", p { "鍏堢Е鍗犲崪鍔熻兘寮€鍙戜腑,灏嗘敮鎸佽搷鑽夋紨鍗︿笌鐢查鐏煎厗銆? } } } }
 }
 
-// ============ 西方占星 - 专项 ============
+// ============ 瑗挎柟鍗犳槦 - 涓撻」 ============
 
 #[component]
 pub fn AstroHellenistic() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "甯岃厞鍗犳槦" } p { class: "page-desc", "鍙ゅ吀甯岃厞鍗犳槦鏈?鏁村鍒躲€佺晫涓绘槦銆佷竷鏄熶富鏄熴€侀粍閬撻噴鏀炬硶" }
+        div { class: "result-card", h3 { "鍔熻兘瑙勫垝" }
+            ul { li { "鏁村鍒舵帓鐩? } li { "鐣屼富鏄熶笌涓夊垎涓绘槦" } li { "榛勯亾閲婃斁娉?(Zodiacal Releasing)" } li { "涓冩槦涓绘槦鍒嗘瀽" } } } } }
 }
 
 #[component]
 pub fn AstroHorary() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "鍗滃崷鍗犳槦" } p { class: "page-desc", "鍗犳槦鍗滃崷鐩?浠ユ彁闂椂鍒昏捣鐩?鍒嗘瀽浜嬩欢璧板悜" }
+        div { class: "result-card", h3 { "鍔熻兘瑙勫垝" }
+            ul { li { "璧烽棶鏃跺埢鎺掔洏" } li { "搴欐椇寮遍櫡鍒嗘瀽" } li { "鐗规畩鐐?(Lot) 璁＄畻" } li { "鏈堜寒绌轰骸妫€鏌? } } } } }
 }
 
 #[component]
 pub fn AstroElectional() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "鎷╂棩鍗犳槦" } p { class: "page-desc", "鎷╂棩鍗犳槦:閫夋嫨鍚夋棩鑹景,浼樺寲浜嬩欢寮€灞曟椂鏈? }
+        div { class: "result-card", h3 { "鍔熻兘瑙勫垝" }
+            ul { li { "鎷╂棩鏄熺洏鎺掔洏" } li { "琛屾槦鏃惰景 (Planetary Hours)" } li { "鏈堜寒绌轰骸妫€娴? } li { "鍚夊嚩璇勫垎绯荤粺" } } } } }
 }
 
 #[component]
 pub fn AstroMundane() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "涓栬繍鍗犳槦" } p { class: "page-desc", "涓栬繍鍗犳槦 (Mundane Astrology):鍒嗘瀽鍥藉銆佹椂浠ｈ繍鍔? }
+        div { class: "result-card", h3 { "鍔熻兘瑙勫垝" }
+            ul { li { "鏄ョ鍒嗙洏 (Aries Ingress)" } li { "鏃ラ鏈堥鐩? } li { "澶у悎鐩稿垎鏋? } li { "鍥藉鏄熺洏绠＄悊" } } } } }
 }
 
 #[component]
 pub fn AstroGermany() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "寰峰浗瀛︽淳" } p { class: "page-desc", "寰峰浗姹夊牎瀛︽淳鍗犳槦:涓偣娉曘€?0搴﹂噺琛ㄣ€佽秴琛屾槦" }
+        div { class: "result-card", h3 { "鍔熻兘瑙勫垝" }
+            ul { li { "90搴﹂噺琛?(90掳 Dial)" } li { "涓偣鏍?(Midpoint Tree)" } li { "瓒呰鏄熺鍙蜂綋绯? } li { "瀵圭О鎬у垎鏋? } } } } }
 }
 
 #[component]
 pub fn AstroSynastry() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "鍚堢洏杩涢樁" } p { class: "page-desc", "杩涢樁鍚堢洏鍒嗘瀽:姣旇緝鐩樸€佺粍鍚堢洏銆佹椂绌轰腑鐐圭洏銆佹埓缁存．鐩? }
+        div { class: "result-card",
+            p { "鍚堢洏鍔熻兘璇蜂娇鐢ㄥ乏渚у鑸腑鐨勩€屽悎鐩樸€嶉〉闈€? }
+            p { "鏀寔鐨勭洏鍨? 姣旇緝鐩?琛屾槦钀藉+鐩镐綅)銆佺粍鍚堢洏(Compsite)銆佹椂绌轰腑鐐圭洏(Time/Space Midpoint)銆? } } } }
 }
 
 #[component]
 pub fn AstroAcg() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "ACG 鍦扮悊鍗犳槦" } p { class: "page-desc", "Astro*Carto*Graphy 鍦扮悊鍗犳槦:琛屾槦绾夸笌涓栫晫鍦板浘" }
+        div { class: "result-card", h3 { "鍔熻兘瑙勫垝" }
+            ul { li { "琛屾槦鍗囪捣绾?(ASC Lines)" } li { "澶╅《绾?(MC Lines)" } li { "澶╁簳绾?(IC Lines)" } li { "涓嬮檷绾?(DSC Lines)" } } } } }
 }
 
 #[component]
 pub fn AstroRectification() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "鐢熸椂鏍℃" } p { class: "page-desc", "鍑虹敓鏃堕棿鏍℃:閫氳繃閲嶅ぇ浜嬩欢鍙嶆帹绮剧‘鍑虹敓鏃堕棿" }
+        div { class: "result-card", h3 { "鍔熻兘瑙勫垝" }
+            ul { li { "浜嬩欢褰曞叆涓庢椂闂存帹绠? } li { "澶槼寮ф牎姝ｆ硶" } li { "涓婚檺娉曟牎姝? } li { "澶氫簨浠朵氦鍙夐獙璇? } } } } }
 }
 
-// ============ 工具 - 骰子 / 二十八宿 ============
+// ============ 宸ュ叿 - 楠板瓙 / 浜屽崄鍏 ============
 
 #[component]
 pub fn Dice() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "鍗犳槦楠板瓙" } p { class: "page-desc", "鍗犳槦楠板瓙鍗犲崪:涓夋灇楠板瓙鍒嗗埆瀵瑰簲琛屾槦銆佹槦搴с€佸浣? }
+        div { class: "result-card", h3 { "鍔熻兘瑙勫垝" }
+            p { "鍗犳槦楠板瓙灏嗘敮鎸侀殢鏈烘幏楠颁笌瑙ｈ銆傝鏄熼 脳 鏄熷骇楠?脳 瀹綅楠?= 蹇€熷崰鍗溿€? } } } }
 }
 
 #[component]
 pub fn Su28() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "浜屽崄鍏" } p { class: "page-desc", "浜屽崄鍏瑙傛祴涓庡懡鐞?璺濇槦銆佸害鏁般€佸鍚嶅搴? }
+        div { class: "result-card",
+            p { "浜屽崄鍏绯荤粺宸插湪涓冩斂鍥涗綑椤甸潰涓睍绀?琛屾槦浣嶇疆甯︽湁瀹垮害淇℃伅)銆? }
+            p { "鐙珛浜屽崄鍏鏌ラ槄椤甸潰寮€鍙戜腑,灏嗘敮鎸佸搴︽煡璇笌瀹垮懡瀵瑰簲鍏崇郴銆? } } } }
 }
 
-// ============ 邵子系列 ============
+// ============ 閭靛瓙绯诲垪 ============
 
 #[component]
 pub fn SzBaGua() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "閭靛瓙鍏崷" } p { class: "page-desc", "閭甸泹鍏堝ぉ鍏崷浣撶郴:鍏崷鏂逛綅銆佹搴忋€佽薄鎰? }
+        div { class: "result-card", h3 { "鍔熻兘瑙勫垝" }
+            ul { li { "鍏堝ぉ鍏崷鏂逛綅鍥? } li { "浼忕静鍏崄鍥涘崷娆″簭" } li { "鍏崷涓囩墿绫昏薄" } li { "鍗﹀簭鎺ㄦ紨" } } } } }
 }
 
 #[component]
 pub fn SzDunJia() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "閭靛瓙閬佺敳" } p { class: "page-desc", "閭甸泹閬佺敳浣撶郴:浠ュぉ鍦颁汉涓夌洏缁撳悎閬佺敳涔濆" }
+        div { class: "result-card", p { "閭靛瓙閬佺敳鎺ㄦ紨鍔熻兘寮€鍙戜腑銆傚熀纭€鎺掔洏璇蜂娇鐢ㄣ€屽闂ㄩ亖鐢层€嶉〉闈€? } } } }
 }
 
 #[component]
 pub fn SzTaiYi() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "閭靛瓙澶箼" } p { class: "page-desc", "閭甸泹澶箼浣撶郴:缁撳悎澶箼鍗佸叚绁炰笌閭甸泹鍏冧細杩愪笘" }
+        div { class: "result-card", p { "閭靛瓙澶箼鎺ㄦ紨鍔熻兘寮€鍙戜腑銆傚熀纭€鎺掔洏璇蜂娇鐢ㄣ€屽お涔欑鏁般€嶉〉闈€? } } } }
 }
-
-// ============ 邵子扩展 ============
 
 #[component]
 pub fn SzFangWei() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "閭靛瓙鏂逛綅" } p { class: "page-desc", "閭靛瓙鏂逛綅鎺ㄧ畻:浠ュ厓浼氳繍涓栨帹婕斿悏鍑舵柟浣? }
+        div { class: "result-card", p { "閭靛瓙鏂逛綅鎺ㄦ紨鍔熻兘寮€鍙戜腑,灏嗘敮鎸佹椂绌哄悏鍑舵柟浣嶈绠椼€? } } } }
 }
 
 #[component]
 pub fn SzFengYe() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "閭靛瓙鍒嗛噹" } p { class: "page-desc", "閭靛瓙鍒嗛噹:浠ヤ簩鍗佸叓瀹垮垎閲庢硶瀵瑰簲鍦扮悊鍖哄煙" }
+        div { class: "result-card", p { "閭靛瓙鍒嗛噹鍔熻兘寮€鍙戜腑,灏嗘敮鎸佸搴︿笌鍦扮悊鍖哄煙瀵瑰簲銆? } } } }
 }
 
 #[component]
 pub fn SzNiXiang() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "閭靛瓙閫嗚薄" } p { class: "page-desc", "閭靛瓙閫嗚薄鎺ㄦ紨:浠ュ崷璞′箣閫嗛『鎺ㄦ紨鍚夊嚩鍙樺寲" }
+        div { class: "result-card", p { "閭靛瓙閫嗚薄鎺ㄦ紨鍔熻兘寮€鍙戜腑,灏嗘敮鎸佸崷璞￠€嗛『鍙樺寲鍒嗘瀽銆? } } } }
 }
 
 #[component]
 pub fn SzSign() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "閭靛瓙寰佸簲" } p { class: "page-desc", "閭靛瓙寰佸簲:浠ュぉ鍦板洓璞℃帹婕斾汉浜嬪緛搴? }
+        div { class: "result-card", p { "閭靛瓙寰佸簲鍔熻兘寮€鍙戜腑,灏嗘敮鎸佸ぉ鍦板洓璞′笌浜轰簨寰佸簲鍒嗘瀽銆? } } } }
 }
 
-// ============ 命理其他 ============
+// ============ 鍛界悊鍏朵粬 ============
 
 #[component]
 pub fn MingOther() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "鍏朵粬鍛界悊" } p { class: "page-desc", "鍏朵粬鍛界悊鎶€娉?绾崇敳銆佹槦骞充細娴枫€佸叞鍙板閫夈€佹渤娲涚悊鏁扮瓑" }
+        div { class: "result-card", h3 { "寰呴泦鎴愭妧娉? }
+            div { class: "feature-grid",
+                div { class: "feature-card", h3 { "绾崇敳" } p { "浠ュぉ骞茬撼鍦版敮,缁撳悎鍗﹁薄鎺ㄦ紨" } }
+                div { class: "feature-card", h3 { "鏄熷钩浼氭捣" } p { "鏁村悎鍗犳槦涓庡叓瀛楃殑楂樼骇鎶€娉? } }
+                div { class: "feature-card", h3 { "鍏板彴濡欓€? } p { "浠ョ撼闊充簲琛屾帹婕旀牸灞€" } }
+                div { class: "feature-card", h3 { "娌虫礇鐞嗘暟" } p { "浠ユ渤鍥炬礇涔︽帹婕斿懡鐞? } }
+            } } } }
 }
-
-// ============ 宿占 ============
 
 #[component]
 pub fn SuZhan() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "瀹垮崰" } p { class: "page-desc", "浜屽崄鍏鍗犲崪:浠ユ湀瀹夸簩鍗佸叓瀹夸负鍗?缁撳悎鏈堢浉涓庡搴? }
+        div { class: "result-card", h3 { "鍔熻兘瑙勫垝" }
+            ul { li { "褰撴湀鏈堝鎺ㄧ畻" } li { "浜屽崄鍏鍚夊嚩" } li { "瀹垮崰缁煎悎瑙ｈ" } } } } }
 }
-
-// ============ 通涉法 ============
 
 #[component]
 pub fn TongSheFa() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "閫氭秹娉? } p { class: "page-desc", "閫氭秹娉?鐜勫閫氭秹杞崲鎶€娉?璺ㄨ秺涓嶅悓鏈暟浣撶郴" }
+        div { class: "result-card", p { "閫氭秹娉曞姛鑳藉紑鍙戜腑,灏嗘敮鎸佷笉鍚屾湳鏁颁綋绯荤殑浜掗€氳浆鎹€? } } } }
 }
-
-// ============ 其他 ============
 
 #[component]
 pub fn OtherBu() -> Element {
-    VNode::empty()
+    rsx! { div { class: "page", h2 { "鍏朵粬鍗滄硶" } p { class: "page-desc", "鍏朵粬鍗犲崪鏂规硶:鎶界銆佽В姊︺€佹祴瀛椼€佺伒妫嬬粡绛? }
+        div { class: "result-card", h3 { "寰呴泦鎴愬崰娉? }
+            div { class: "feature-grid",
+                div { class: "feature-card", h3 { "鎶界" } p { "鍏冲笣鐏电銆佽闊崇绛夊绛剧郴缁? } }
+                div { class: "feature-card", h3 { "瑙ｆⅵ" } p { "鍛ㄥ叕瑙ｆⅵ涓庡共鏀薄鎰忕患鍚堣В璇? } }
+                div { class: "feature-card", h3 { "娴嬪瓧" } p { "浠ュ瓧褰㈢瑪鐢诲崰鏂悏鍑? } }
+                div { class: "feature-card", h3 { "鐏垫缁? } p { "鍗佷簩鏋氭瀛愭紨鍗︽帹婕? } }
+            } } } }
 }
 
 // ============ 404 ============
