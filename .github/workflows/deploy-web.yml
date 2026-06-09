@@ -1,0 +1,114 @@
+name: Build & Deploy Web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'crates/divines-web/**'
+      - 'crates/divines-core/**'
+      - 'crates/divines-calc/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/deploy-web.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: web-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write
+  packages: write
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-web-${{ hashFiles('Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-web-
+
+      - name: Build Web
+        run: |
+          cargo build --release --target wasm32-unknown-unknown --package divines-web --no-default-features --features web
+
+      - name: Install wasm-bindgen-cli
+        run: cargo install wasm-bindgen-cli --version 0.2.122
+
+      - name: Generate JS bindings
+        run: |
+          mkdir -p dist
+          wasm-bindgen \
+            --target web \
+            --no-typescript \
+            --out-dir dist \
+            --out-name divines \
+            target/wasm32-unknown-unknown/release/divines-web.wasm
+
+      - name: Create index.html
+        run: |
+          cat > dist/index.html << 'HTMLEOF'
+          <!DOCTYPE html>
+          <html lang="zh-CN">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Divines - 私域工作站</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              html, body { width: 100%; height: 100%; overflow: hidden; background: #0d1117; }
+              #loading {
+                display: flex; flex-direction: column; align-items: center; justify-content: center;
+                height: 100vh; gap: 16px; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              }
+              .spinner {
+                width: 40px; height: 40px;
+                border: 3px solid #30363d; border-top-color: #58a6ff;
+                border-radius: 50%; animation: spin 0.8s linear infinite;
+              }
+              @keyframes spin { to { transform: rotate(360deg); } }
+              .error { color: #f85149; font-size: 14px; display: none; }
+            </style>
+          </head>
+          <body>
+            <div id="loading">
+              <div class="spinner"></div>
+              <div>Divines 加载中...</div>
+              <div id="error" class="error"></div>
+            </div>
+            <script type="module">
+              import init from './divines.js';
+              try {
+                await init();
+                document.getElementById('loading').style.display = 'none';
+              } catch (e) {
+                const err = document.getElementById('error');
+                err.style.display = 'block';
+                err.textContent = '加载失败: ' + e.message;
+              }
+            </script>
+          </body>
+          </html>
+          HTMLEOF
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: dist/
+          retention-days: 30
